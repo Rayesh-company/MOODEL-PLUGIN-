@@ -69,17 +69,54 @@ class publish_quiz extends external_api {
         }
 
         // 3. Assemble the Moodle Quiz.
-        $quizid = quiz_builder::create_quiz_with_questions($params['courseid'], $params['quizname'], $createdqids, [
+        $quizinfo = quiz_builder::create_quiz_with_questions($params['courseid'], $params['quizname'], $createdqids, [
             'timelimit' => $params['timelimit'],
             'attempts' => $params['attempts'],
             'preferredbehaviour' => $params['preferredbehaviour'],
         ]);
+        $quizid = $quizinfo['quizid'];
+        $cmid = $quizinfo['cmid'];
 
-        $quizurl = new moodle_url('/mod/quiz/view.php', ['id' => $quizid]);
+        $quizurl = new moodle_url('/mod/quiz/view.php', ['id' => $cmid]);
+
+        // 4. Record session and questions for tracking, monitoring, and quality feedback.
+        global $USER;
+        $qtypes = array_unique(array_map(function($q) {
+            return $q['qtype'] ?? 'multichoice';
+        }, $questions));
+
+        $sessionid = $DB->insert_record('local_aiquizgen_sessions', [
+            'courseid' => $params['courseid'],
+            'userid' => $USER->id,
+            'prompt' => '',
+            'difficulty' => 'standard',
+            'qtypes' => implode(',', $qtypes),
+            'targetqcount' => count($createdqids),
+            'status' => 'published',
+            'quizid' => $quizid,
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+
+        foreach ($questions as $idx => $q) {
+            $qid = $createdqids[$idx] ?? null;
+            $DB->insert_record('local_aiquizgen_questions', [
+                'sessionid' => $sessionid,
+                'qtype' => $q['qtype'] ?? 'multichoice',
+                'questiontext' => $q['questiontext'] ?? '',
+                'questiondata' => json_encode($q, JSON_UNESCAPED_UNICODE),
+                'editedbyuser' => !empty($q['is_edited']) ? 1 : 0,
+                'repromptcount' => $q['reprompt_count'] ?? 0,
+                'moodlequestionid' => $qid,
+                'timecreated' => time(),
+                'timemodified' => time(),
+            ]);
+        }
 
         return [
             'status' => true,
             'quizid' => $quizid,
+            'cmid' => $cmid,
             'quizurl' => $quizurl->out(false),
             'questionscount' => count($createdqids),
             'message' => get_string('publish_success_message', 'local_aiquizgen'),
@@ -90,6 +127,7 @@ class publish_quiz extends external_api {
         return new external_function_parameters([
             'status' => new external_value(PARAM_BOOL, 'Status'),
             'quizid' => new external_value(PARAM_INT, 'ID of created quiz'),
+            'cmid' => new external_value(PARAM_INT, 'Course module ID of created quiz', VALUE_OPTIONAL),
             'quizurl' => new external_value(PARAM_URL, 'URL of created quiz'),
             'questionscount' => new external_value(PARAM_INT, 'Number of questions created'),
             'message' => new external_value(PARAM_TEXT, 'Success message'),

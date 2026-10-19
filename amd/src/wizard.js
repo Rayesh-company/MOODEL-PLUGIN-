@@ -21,6 +21,28 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         bindEvents: function() {
             const self = this;
 
+            // Main view tabs (Generator Wizard vs Analytics Dashboard)
+            const tabGen = document.getElementById('tab-generator-btn');
+            const tabAnalytics = document.getElementById('tab-analytics-btn');
+            const viewGen = document.getElementById('view-generator-pane');
+            const viewAnalytics = document.getElementById('view-analytics-pane');
+
+            if (tabGen && tabAnalytics && viewGen && viewAnalytics) {
+                tabGen.addEventListener('click', function() {
+                    tabGen.classList.add('active');
+                    tabAnalytics.classList.remove('active');
+                    viewGen.classList.remove('d-none');
+                    viewAnalytics.classList.add('d-none');
+                });
+
+                tabAnalytics.addEventListener('click', function() {
+                    tabAnalytics.classList.add('active');
+                    tabGen.classList.remove('active');
+                    viewAnalytics.classList.remove('d-none');
+                    viewGen.classList.add('d-none');
+                });
+            }
+
             // Nav tabs
             document.querySelectorAll('.step-nav-btn').forEach(btn => {
                 btn.addEventListener('click', function() {

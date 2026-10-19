@@ -231,6 +231,9 @@ class quiz_builder {
         } else if (function_exists('quiz_update_sumgrades')) {
             quiz_update_sumgrades($quiz);
         }
-        return $quizid;
+        return [
+            'quizid' => $quizid,
+            'cmid' => $cmid,
+        ];
     }
 }

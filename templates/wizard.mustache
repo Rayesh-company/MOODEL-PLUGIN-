@@ -15,183 +15,339 @@
                 <h3 class="mb-1 fw-bold text-primary">✨ {{#str}} pluginname, local_aiquizgen {{/str}}</h3>
                 <p class="text-muted small mb-0">{{coursename}}</p>
             </div>
-            <div>
+            <div class="d-flex align-items-center gap-2">
                 <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
                     ● {{#str}} core_ai_connected, core_ai {{/str}}
                 </span>
             </div>
         </div>
 
-        <!-- Wizard Nav Steps -->
-        <div class="row g-2 text-center mb-4 font-weight-bold" id="wizard-steps-header">
-            <div class="col-3">
-                <button type="button" class="btn btn-outline-primary w-100 py-2 active step-nav-btn" data-step="1">
-                    <span class="badge bg-primary text-white rounded-circle me-1">۱</span> انتخاب منابع درس
+        <!-- Top Main View Switcher (Wizard vs Analytics Dashboard) -->
+        <ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3" id="main-view-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold px-4 py-2" id="tab-generator-btn" type="button">
+                    ➕ ساخت آزمون جدید (Wizard)
                 </button>
-            </div>
-            <div class="col-3">
-                <button type="button" class="btn btn-outline-secondary w-100 py-2 step-nav-btn" data-step="2">
-                    <span class="badge bg-secondary text-white rounded-circle me-1">۲</span> مشخصات آزمون
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold px-4 py-2" id="tab-analytics-btn" type="button">
+                    📊 داشبورد و مانیتورینگ آزمون‌ها <span class="badge bg-secondary ms-1">{{total_ai_quizzes}}</span>
                 </button>
-            </div>
-            <div class="col-3">
-                <button type="button" class="btn btn-outline-secondary w-100 py-2 step-nav-btn" data-step="3">
-                    <span class="badge bg-secondary text-white rounded-circle me-1">۳</span> پیش‌نمایش و اصلاح
-                </button>
-            </div>
-            <div class="col-3">
-                <button type="button" class="btn btn-outline-secondary w-100 py-2 step-nav-btn" data-step="4">
-                    <span class="badge bg-secondary text-white rounded-circle me-1">۴</span> تأیید و انتشار
-                </button>
-            </div>
-        </div>
+            </li>
+        </ul>
 
-        <!-- STEP 1: Resources Selection -->
-        <div class="wizard-pane" id="pane-step-1">
-            <h5 class="fw-bold mb-2">انتخاب فایل‌ها و متون مرجع</h5>
-            <p class="text-muted small mb-3">منابع مورد نظر برای طرح سوال را انتخاب نمایید یا سرفصل‌های تکمیلی را بنویسید.</p>
-            
-            <div class="card mb-3">
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <span class="small fw-bold">فایل‌های بارگذاری‌شده در درس</span>
-                    <button type="button" class="btn btn-sm btn-link text-decoration-none" id="btn-refresh-files">🔄 بروزرسانی فایل‌ها</button>
+        <!-- ================================================================= -->
+        <!-- VIEW 1: GENERATION WIZARD                                         -->
+        <!-- ================================================================= -->
+        <div id="view-generator-pane">
+            <!-- Wizard Nav Steps -->
+            <div class="row g-2 text-center mb-4 font-weight-bold" id="wizard-steps-header">
+                <div class="col-3">
+                    <button type="button" class="btn btn-outline-primary w-100 py-2 active step-nav-btn" data-step="1">
+                        <span class="badge bg-primary text-white rounded-circle me-1">۱</span> انتخاب منابع درس
+                    </button>
                 </div>
-                <div class="card-body p-0">
-                    <div id="course-files-list" class="list-group list-group-flush">
-                        <div class="p-3 text-center text-muted small">در حال خواندن فایل‌های درس از Moodle File Storage...</div>
+                <div class="col-3">
+                    <button type="button" class="btn btn-outline-secondary w-100 py-2 step-nav-btn" data-step="2">
+                        <span class="badge bg-secondary text-white rounded-circle me-1">۲</span> مشخصات آزمون
+                    </button>
+                </div>
+                <div class="col-3">
+                    <button type="button" class="btn btn-outline-secondary w-100 py-2 step-nav-btn" data-step="3">
+                        <span class="badge bg-secondary text-white rounded-circle me-1">۳</span> پیش‌نمایش و اصلاح
+                    </button>
+                </div>
+                <div class="col-3">
+                    <button type="button" class="btn btn-outline-secondary w-100 py-2 step-nav-btn" data-step="4">
+                        <span class="badge bg-secondary text-white rounded-circle me-1">۴</span> تأیید و انتشار
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 1: Resources Selection -->
+            <div class="wizard-pane" id="pane-step-1">
+                <h5 class="fw-bold mb-2">انتخاب فایل‌ها و متون مرجع</h5>
+                <p class="text-muted small mb-3">منابع مورد نظر برای طرح سوال را انتخاب نمایید یا سرفصل‌های تکمیلی را بنویسید.</p>
+                
+                <div class="card mb-3">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <span class="small fw-bold">فایل‌های بارگذاری‌شده در درس</span>
+                        <button type="button" class="btn btn-sm btn-link text-decoration-none" id="btn-refresh-files">🔄 بروزرسانی فایل‌ها</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="course-files-list" class="list-group list-group-flush">
+                            <div class="p-3 text-center text-muted small">در حال جستجوی منابع درس...</div>
+                        </div>
                     </div>
                 </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">متن دلخواه یا نکات تکمیلی استاد (اختیاری):</label>
+                    <textarea class="form-control" id="teacher-custom-prompt" rows="4" placeholder="مثال: سوالات بیشتر بر روی مفاهیم فصل سوم (الگوهای معماری) تمرکز داشته باشد و از تعاریف صرفاً حفظی پرهیز شود."></textarea>
+                </div>
+
+                <div class="text-end">
+                    <button type="button" class="btn btn-primary px-4" id="btn-to-step-2">مرحله بعد: تنظیمات آزمون ←</button>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label small fw-bold">دستورالعمل، نکات کلیدی تدریس یا متن دستی استاد (اختیاری):</label>
-                <textarea id="teacher-custom-prompt" rows="3" class="form-control" placeholder="مثال: سوالات بیشتر بر روی تحلیل مزایای الگوریتم نسبت به روش سنتی تمرکز داشته باشد..."></textarea>
-            </div>
+            <!-- STEP 2: Parameters Configuration -->
+            <div class="wizard-pane d-none" id="pane-step-2">
+                <h5 class="fw-bold mb-2">مشخصات آزمون و پارامترها</h5>
+                <p class="text-muted small mb-3">سطح دشواری و انواع سوالات دانشگاهی مد نظر خود را مشخص کنید.</p>
 
-            <div class="d-flex justify-content-end">
-                <button type="button" class="btn btn-primary px-4" id="btn-to-step-2">گام بعدی: تنظیمات آزمون ←</button>
-            </div>
-        </div>
-
-        <!-- STEP 2: Configure Parameters -->
-        <div class="wizard-pane d-none" id="pane-step-2">
-            <h5 class="fw-bold mb-2">پیکربندی ساختار آزمون</h5>
-            <p class="text-muted small mb-3">تعداد، انواع سوالات و درجه سختی آزمون را مشخص کنید.</p>
-
-            <div class="row g-4 mb-4">
-                <div class="col-md-6">
-                    <div class="p-3 border rounded-3 bg-light">
-                        <label class="form-label small fw-bold d-flex justify-content-between">
-                            <span>تعداد کل سوالات:</span>
-                            <span id="label-qcount" class="badge bg-primary">۱۰ سوال</span>
-                        </label>
-                        <input type="range" class="form-range" id="input-qcount" min="3" max="30" value="10">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">تعداد کل سوالات:</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="range" class="form-range" id="input-qcount" min="3" max="30" value="10">
+                            <span class="badge bg-primary px-3 py-2 fs-6" id="label-qcount">10 سوال</span>
+                        </div>
                     </div>
-
-                    <div class="p-3 border rounded-3 mt-3">
-                        <label class="form-label small fw-bold">سطح دشواری دانشگاهی:</label>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">سطح دشواری (تاکسونومی بلوم):</label>
                         <div class="d-flex gap-2">
-                            <div class="form-check">
+                            <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="difficulty" id="diff-standard" value="standard">
-                                <label class="form-check-label small" for="diff-standard">مفهومی و پایه</label>
+                                <label class="form-check-label small" for="diff-standard">مفهومی و استاندارد</label>
                             </div>
-                            <div class="form-check">
+                            <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="difficulty" id="diff-analytical" value="analytical" checked>
                                 <label class="form-check-label small" for="diff-analytical">تحلیلی و کاربردی</label>
                             </div>
-                            <div class="form-check">
+                            <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="difficulty" id="diff-hard" value="hard">
-                                <label class="form-check-label small" for="diff-hard">پیشرفته و عمیق</label>
+                                <label class="form-check-label small" for="diff-hard">پیشرفته و ارزیابی</label>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="p-3 border rounded-3">
-                        <label class="form-label small fw-bold mb-2">انواع سوالات مورد پذیرش:</label>
-                        <div class="d-flex flex-column gap-2 small">
-                            <label><input type="checkbox" class="qtype-check" value="multichoice" checked> چهارگزینه‌ای (Multiple Choice)</label>
-                            <label><input type="checkbox" class="qtype-check" value="truefalse" checked> صحیح / غلط (True/False)</label>
-                            <label><input type="checkbox" class="qtype-check" value="shortanswer" checked> کوتاه‌پاسخ (Short Answer)</label>
-                            <label><input type="checkbox" class="qtype-check" value="essay" checked> تشریحی تحلیلی (Essay)</label>
-                            <label><input type="checkbox" class="qtype-check" value="match" checked> تطبیقی / جورکردنی (Matching)</label>
+                <div class="card mb-4 p-3 bg-light border-0">
+                    <label class="form-label small fw-bold mb-2">انواع سوالات مجاز:</label>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input qtype-check" type="checkbox" value="multichoice" id="qt-mcq" checked>
+                                <label class="form-check-label small" for="qt-mcq">چندگزینه‌ای (MCQ)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input qtype-check" type="checkbox" value="truefalse" id="qt-tf" checked>
+                                <label class="form-check-label small" for="qt-tf">صحیح / غلط</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input qtype-check" type="checkbox" value="essay" id="qt-essay" checked>
+                                <label class="form-check-label small" for="qt-essay">تشریحی تحلیلی (همراه بارم)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input qtype-check" type="checkbox" value="shortanswer" id="qt-sa" checked>
+                                <label class="form-check-label small" for="qt-sa">پاسخ کوتاه (اصطلاحات)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input qtype-check" type="checkbox" value="match" id="qt-match" checked>
+                                <label class="form-check-label small" for="qt-match">وصل‌کردنی (تطبیقی)</label>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" id="btn-back-to-step-1">→ بازگشت به منابع</button>
+                    <button type="button" class="btn btn-success px-4" id="btn-generate-ai">🚀 تولید سوالات با هوش مصنوعی</button>
+                </div>
             </div>
 
-            <div class="d-flex justify-content-between">
-                <button type="button" class="btn btn-outline-secondary" id="btn-back-to-step-1">→ مرحله قبل</button>
-                <button type="button" class="btn btn-primary px-4 fw-bold" id="btn-generate-ai">✨ تولید سوالات با هوش مصنوعی ←</button>
+            <!-- STEP 3: Preview, Edit & Re-prompt -->
+            <div class="wizard-pane d-none" id="pane-step-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-1">پیش‌نمایش و بازبینی سوالات</h5>
+                        <p class="text-muted small mb-0">متن هر سوال را مستقیماً ویرایش کنید، سوالات نامطلوب را حذف کنید، یا با پرامپت تکی بازتولید نمایید.</p>
+                    </div>
+                    <span class="badge bg-primary fs-6 px-3 py-2" id="preview-count-badge">0 سوال</span>
+                </div>
+
+                <div id="generated-questions-container" class="vstack gap-3 mb-4">
+                    <!-- Dynamic Questions Injected Here by wizard.js -->
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" id="btn-back-to-step-2">→ ویرایش پارامترها</button>
+                    <button type="button" class="btn btn-primary px-4" id="btn-to-step-4">مرحله بعد: تنظیمات آزمون و انتشار ←</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Confirm & Publish to Moodle Quiz -->
+            <div class="wizard-pane d-none" id="pane-step-4">
+                <h5 class="fw-bold mb-2">تأیید نهایی و ساخت آزمون در مودل</h5>
+                <p class="text-muted small mb-3">مشخصات آزمون در سامانه مودل را بررسی و جهت انتشار نهایی تأیید نمایید.</p>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">عنوان آزمون در درس:</label>
+                        <input type="text" class="form-control" id="final-quiz-name" value="آزمون آنلاین هوشمند - {{coursename}}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">نام دسته در بانک سوالات:</label>
+                        <input type="text" class="form-control" id="final-category-name" value="بانک سوالات هوش مصنوعی {{coursename}}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">مدت زمان آزمون (دقیقه):</label>
+                        <input type="number" class="form-control" id="final-timelimit" value="20" min="5" max="180">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">تعداد دفعات مجاز تلاش:</label>
+                        <input type="number" class="form-control" id="final-attempts" value="1" min="1" max="10">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">رفتار بازخورد سوالات:</label>
+                        <select class="form-select" id="final-behaviour">
+                            <option value="deferredfeedback" selected>بازخورد معوق (پس از اتمام آزمون)</option>
+                            <option value="immediatefeedback">بازخورد فوری حین آزمون</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" id="btn-back-to-step-3">→ بازگشت به پیش‌نمایش سوالات</button>
+                    <button type="button" class="btn btn-success btn-lg px-4" id="btn-publish-final">✅ تأیید نهایی استاد و ساخت آزمون در مودل</button>
+                </div>
+
+                <div id="publish-result-alert" class="alert alert-success d-none mt-4 text-center">
+                    <h5 class="fw-bold">🎉 آزمون با موفقیت ساخته شد!</h5>
+                    <p class="small mb-3" id="publish-result-msg"></p>
+                    <a href="#" id="publish-quiz-link" class="btn btn-success btn-sm">مشاهده آزمون در مودل</a>
+                </div>
             </div>
         </div>
 
-        <!-- STEP 3: Preview & Edit -->
-        <div class="wizard-pane d-none" id="pane-step-3">
-            <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
-                <span class="small fw-bold">پیش‌نمایش سوالات تولیدی — می‌توانید مستقیماً متن را اصلاح یا با AI بازتولید کنید.</span>
-                <span class="badge bg-primary" id="preview-count-badge">۰ سوال</span>
-            </div>
-
-            <div id="generated-questions-container" class="vstack gap-3 mb-4">
-                <!-- Dynamically populated question cards -->
-            </div>
-
-            <div class="d-flex justify-content-between">
-                <button type="button" class="btn btn-outline-secondary" id="btn-back-to-step-2">→ بازگشت به تنظیمات</button>
-                <button type="button" class="btn btn-primary px-4 fw-bold" id="btn-to-step-4">مرحله بعد: انتشار در آزمون‌های مودل ←</button>
-            </div>
-        </div>
-
-        <!-- STEP 4: Publish to Moodle -->
-        <div class="wizard-pane d-none" id="pane-step-4">
-            <h5 class="fw-bold mb-2">تنظیمات ماژول آزمون مودل (mod_quiz)</h5>
-            <p class="text-muted small mb-3">آزمون به همراه تمامی سوالات تأیید شده شما در صفحه درس ساخته خواهد شد.</p>
-
-            <div class="card p-3 mb-4 bg-light">
-                <div class="row g-3 small">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">نام آزمون در درس:</label>
-                        <input type="text" id="final-quiz-name" class="form-control" value="آزمون کلاسی طراحی شده با هوش مصنوعی">
+        <!-- ================================================================= -->
+        <!-- VIEW 2: MONITORING & ANALYTICS DASHBOARD                          -->
+        <!-- ================================================================= -->
+        <div id="view-analytics-pane" class="d-none">
+            <!-- Metric KPI Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card p-3 border-0 bg-primary-subtle text-primary rounded-3 text-center">
+                        <div class="fs-3 fw-bold">{{total_ai_quizzes}}</div>
+                        <div class="small fw-bold">کل آزمون‌های هوش مصنوعی</div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">نام دسته‌بندی در بانک سوالات:</label>
-                        <input type="text" id="final-category-name" class="form-control" value="سوالات AI / درس جاری">
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3 border-0 bg-success-subtle text-success rounded-3 text-center">
+                        <div class="fs-3 fw-bold">{{total_participated}}</div>
+                        <div class="small fw-bold">پاسخ‌های ثبت‌شده دانشجویان</div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">محدودیت زمانی (دقیقه):</label>
-                        <input type="number" id="final-timelimit" class="form-control" value="30">
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3 border-0 bg-warning-subtle text-warning-emphasis rounded-3 text-center">
+                        <div class="fs-3 fw-bold">{{overall_avg_grade}}</div>
+                        <div class="small fw-bold">میانگین نمرات کل درس</div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">تعداد دفعات شرکت:</label>
-                        <select id="final-attempts" class="form-select">
-                            <option value="1" selected>۱ بار</option>
-                            <option value="2">۲ بار</option>
-                            <option value="0">نامحدود</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">رفتار بازخورد سوالات:</label>
-                        <select id="final-behaviour" class="form-select">
-                            <option value="deferredfeedback" selected>بازخورد پس از اتمام آزمون</option>
-                            <option value="immediatefeedback">بازخورد بلافاصله پس از هر سوال</option>
-                        </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3 border-0 bg-info-subtle text-info-emphasis rounded-3 text-center">
+                        <div class="fs-3 fw-bold">{{overall_quality_score}}٪</div>
+                        <div class="small fw-bold">شاخص کیفیت هوش مصنوعی (پذیرش استاد)</div>
                     </div>
                 </div>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center">
-                <button type="button" class="btn btn-outline-secondary" id="btn-back-to-step-3">→ بازگشت به پیش‌نمایش</button>
-                <button type="button" class="btn btn-success btn-lg px-5 fw-bold shadow" id="btn-publish-final">
-                    ✅ تأیید نهایی استاد و ساخت آزمون در مودل
-                </button>
-            </div>
-
-            <div id="publish-result-alert" class="alert alert-success d-none mt-4 text-center">
-                <h5 class="fw-bold">🎉 آزمون با موفقیت ساخته شد!</h5>
-                <p class="small mb-3" id="publish-result-msg"></p>
-                <a href="#" id="publish-quiz-link" class="btn btn-success btn-sm">مشاهده آزمون در مودل</a>
+            <!-- Quizzes Table -->
+            <div class="card border rounded-3 overflow-hidden">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center py-3">
+                    <h6 class="mb-0 fw-bold">📋 فهرست آزمون‌های تولیدشده توسط هوش مصنوعی در این درس</h6>
+                    <span class="badge bg-secondary">{{total_ai_quizzes}} مورد</span>
+                </div>
+                <div class="card-body p-0">
+                    {{#has_sessions}}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 text-center">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th class="text-start pe-4">نام آزمون</th>
+                                    <th>تاریخ ایجاد</th>
+                                    <th>تعداد سوالات</th>
+                                    <th>شرکت‌کنندگان</th>
+                                    <th>میانگین نمره</th>
+                                    <th>پذیرش بدون ادیت</th>
+                                    <th>گزارش‌های مودل</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody class="small">
+                                {{#sessions}}
+                                <tr>
+                                    <td class="text-start pe-4 fw-bold">
+                                        {{quizname}}
+                                        <div class="text-muted smaller font-monospace">انواع: {{qtypes}}</div>
+                                    </td>
+                                    <td class="text-muted">{{timecreatedstr}}</td>
+                                    <td><span class="badge bg-light text-dark border">{{targetqcount}} سوال</span></td>
+                                    <td>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            {{finished_attempts}} شرکت‌کننده
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold text-primary">{{avg_grade}}</td>
+                                    <td>
+                                        <div class="progress" style="height: 6px;" title="{{acceptance_rate}}% پذیرش مستقیم">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: {{acceptance_rate}}%;"></div>
+                                        </div>
+                                        <span class="smaller text-muted">{{acceptance_rate}}٪</span>
+                                    </td>
+                                    <td>
+                                        {{#hasquiz}}
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{{statistics_report_url}}" class="btn btn-outline-primary" title="تحلیل روان‌سنجی: ضریب تمایز و ضریب دشواری تک‌تک سوالات" target="_blank">
+                                                🎯 تحلیل سوالات
+                                            </a>
+                                            <a href="{{responses_report_url}}" class="btn btn-outline-secondary" title="پاسخ‌های تفصیلی تک‌تک دانشجویان به گزینه‌ها" target="_blank">
+                                                👥 پاسخ‌ها
+                                            </a>
+                                            <a href="{{overview_report_url}}" class="btn btn-outline-info" title="گزارش نمرات و بازنگری آزمون" target="_blank">
+                                                📊 نمرات
+                                            </a>
+                                            <a href="{{grading_report_url}}" class="btn btn-outline-warning" title="تصحیح دستی سوالات تشریحی" target="_blank">
+                                                ✍️ تصحیح
+                                            </a>
+                                        </div>
+                                        {{/hasquiz}}
+                                        {{^hasquiz}}
+                                        <span class="text-muted smaller">-</span>
+                                        {{/hasquiz}}
+                                    </td>
+                                    <td>
+                                        {{#hasquiz}}
+                                        <a href="{{quiz_url}}" class="btn btn-sm btn-primary" target="_blank">
+                                            مشاهده آزمون ↗
+                                        </a>
+                                        {{/hasquiz}}
+                                    </td>
+                                </tr>
+                                {{/sessions}}
+                            </tbody>
+                        </table>
+                    </div>
+                    {{/has_sessions}}
+                    {{^has_sessions}}
+                    <div class="p-5 text-center text-muted">
+                        <div class="fs-1 mb-2">📝</div>
+                        <p class="mb-2">هنوز هیچ آزمونی با هوش مصنوعی در این درس ساخته نشده است.</p>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('tab-generator-btn').click();">
+                            اولین آزمون خود را ایجاد کنید
+                        </button>
+                    </div>
+                    {{/has_sessions}}
+                </div>
             </div>
         </div>
 
