@@ -157,6 +157,50 @@ class quiz_builder {
                 }
                 break;
 
+            case 'ordering':
+                if (question_bank::is_qtype_installed('ordering')) {
+                    $formdata->layouttype = 0; // Vertical
+                    $formdata->selecttype = 0; // All items
+                    $formdata->selectcount = 0;
+                    $formdata->gradingtype = 0; // Relative to correct position
+                    $formdata->showgrading = 1;
+                    $formdata->numberingstyle = '123';
+                    $formdata->correctfeedback = ['text' => '', 'format' => FORMAT_HTML];
+                    $formdata->partiallycorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+                    $formdata->incorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+                    $formdata->shownumcorrect = 0;
+                    $formdata->answer = [];
+                    $items = $qdata['items'] ?? $qdata['answers'] ?? [];
+                    foreach ($items as $idx => $it) {
+                        $itemtext = is_array($it) ? ($it['text'] ?? '') : (string)$it;
+                        $formdata->answer[$idx] = ['text' => $itemtext, 'format' => FORMAT_HTML];
+                    }
+                } else {
+                    // Fallback to multichoice if ordering plugin is not available.
+                    $qtype = 'multichoice';
+                    $formdata->qtype = 'multichoice';
+                    $formdata->single = 1;
+                    $formdata->shuffleanswers = 1;
+                    $formdata->answernumbering = 'abc';
+                    $formdata->showstandardinstruction = 0;
+                    $formdata->correctfeedback = ['text' => '', 'format' => FORMAT_HTML];
+                    $formdata->partiallycorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+                    $formdata->incorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+                    $formdata->shownumcorrect = 0;
+                    $items = $qdata['items'] ?? [];
+                    $formdata->noanswers = count($items);
+                    $formdata->answer = [];
+                    $formdata->fraction = [];
+                    $formdata->feedback = [];
+                    foreach ($items as $idx => $it) {
+                        $itemtext = is_array($it) ? ($it['text'] ?? '') : (string)$it;
+                        $formdata->answer[$idx] = ['text' => $itemtext, 'format' => FORMAT_HTML];
+                        $formdata->fraction[$idx] = ($idx === 0) ? 1.0 : 0.0;
+                        $formdata->feedback[$idx] = ['text' => '', 'format' => FORMAT_HTML];
+                    }
+                }
+                break;
+
             default:
                 // Fallback to multichoice.
                 $formdata->single = 1;

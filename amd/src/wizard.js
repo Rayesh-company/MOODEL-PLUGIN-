@@ -221,17 +221,55 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                         </div>
                 `;
 
+                // 1. Multichoice options
                 if (q.answers && q.answers.length > 0) {
                     html += '<div class="vstack gap-1 small mb-2">';
                     q.answers.forEach(a => {
                         const isCorrect = a.iscorrect ? 'text-success fw-bold' : 'text-muted';
-                        html += `<div class="${isCorrect}">• ${a.text} ${a.iscorrect ? '✓ (صحیح)' : ''}</div>`;
+                        html += `<div class="${isCorrect}">• ${a.text} ${a.iscorrect ? '✓ (گزینه صحیح)' : ''}</div>`;
+                    });
+                    html += '</div>';
+                }
+
+                // 2. True / False indicator
+                if (q.qtype === 'truefalse' && q.correctanswer !== undefined) {
+                    const ansText = q.correctanswer ? '✅ صحیح (True)' : '❌ غلط (False)';
+                    html += `<div class="p-2 mb-2 bg-light rounded text-primary small border"><b>پاسخ صحیح:</b> ${ansText}</div>`;
+                }
+
+                // 3. Short answer accepted terms
+                if (q.acceptedanswers && q.acceptedanswers.length > 0) {
+                    html += `<div class="p-2 mb-2 bg-light rounded text-success small border"><b>پاسخ‌های پذیرفته‌شده:</b> ${q.acceptedanswers.join(' | ')}</div>`;
+                }
+
+                // 4. Essay rubric / criteria
+                if (q.rubric) {
+                    html += `<div class="p-2 mb-2 bg-light rounded text-secondary small border">📝 <b>راهنما و بارم تصحیح استاد:</b> ${q.rubric}</div>`;
+                }
+
+                // 5. Matching pairs
+                if (q.pairs && q.pairs.length > 0) {
+                    html += '<div class="vstack gap-1 small mb-2 p-2 bg-light rounded border">';
+                    html += '<div class="fw-bold text-muted mb-1">🔗 جفت‌های تطبیقی:</div>';
+                    q.pairs.forEach(p => {
+                        html += `<div>• <span class="fw-bold">${p.question}</span> ➔ <span class="text-primary">${p.answer}</span></div>`;
+                    });
+                    html += '</div>';
+                }
+
+                // 6. Ordering sequence
+                if (q.items && q.items.length > 0) {
+                    html += '<div class="vstack gap-1 small mb-2 p-2 bg-light rounded border">';
+                    html += '<div class="fw-bold text-muted mb-1">🔢 ترتیب صحیح مراحل:</div>';
+                    q.items.forEach((it, itIdx) => {
+                        const itText = (typeof it === 'object' && it !== null) ? (it.text || '') : it;
+                        html += `<div><span class="badge bg-secondary me-1">${itIdx + 1}</span> ${itText}</div>`;
                     });
                     html += '</div>';
                 }
 
                 if (q.generalfeedback) {
-                    html += `<div class="p-2 bg-light rounded text-muted small border mb-2">💡 <b>توضیح:</b> ${q.generalfeedback}</div>`;
+                    html += `<div class="p-2 bg-light rounded text-muted small border mb-2">💡 <b>توضیح و تحلیل علمی:</b> ${q.generalfeedback}</div>`;
                 }
 
                 html += `

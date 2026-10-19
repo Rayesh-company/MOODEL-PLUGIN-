@@ -104,6 +104,18 @@ JSON SCHEMA:
         {"question": "Item 2", "answer": "Match 2"}
       ],
       "defaultmark": 2.0
+    },
+    {
+      "qtype": "ordering",
+      "name": "Short title",
+      "questiontext": "Order the following steps correctly",
+      "items": [
+        "First step in correct order",
+        "Second step in correct order",
+        "Third step in correct order",
+        "Fourth step in correct order"
+      ],
+      "defaultmark": 2.0
     }
   ]
 }
