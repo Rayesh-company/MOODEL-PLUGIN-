@@ -37,6 +37,12 @@ A **Moodle local plugin** (`local_aiquizgen`) that gives teachers an AI-powered 
   2. **اتصال عمیق به گزارش‌های نیتیو مودل (`mod_quiz\report`)**: دسترسی تک‌کلیکه به گزارش آماری ضریب تمایز و ضریب دشواری تک‌تک سوالات (`report_statistics`)، جدول پاسخ‌های تک‌تک دانشجویان (`report_responses`)، و گزارش نمرات (`report_overview`).
   3. **حلقه بازخورد کیفیت AI (Quality Feedback Loop)**: ثبت دقیق نرخ ویرایش استاد، تعداد بازتولیدها و سوالات حذف‌شده در جدول `local_aiquizgen_questions` برای کالیبراسیون و بهبود خودکار پرامپت‌های بعدی.
 
+- [**PDF & Document Text Extraction Strategy (Ticket 3)**](#) — Zero-Dependency Native PHP Extractor (`\local_aiquizgen\text_extractor`):
+  1. **DOCX / PPTX**: Unzips OpenXML packages (`word/document.xml`, `ppt/slides/slide*.xml`) via PHP's built-in `ZipArchive` and strips tags to return clean structured text.
+  2. **PDF**: Pure-PHP PDF stream decoder extracting text blocks (`Tj`/`TJ`) and decompressing FlateDecode streams via `gzuncompress`.
+  3. **TXT / HTML / MD**: Read directly via `$file->get_content()` and sanitized.
+  4. Works out-of-the-box on all Moodle servers without requiring external binaries (`pdftotext`, `tika`, or Python).
+
 ---
 
 ## Not yet specified
@@ -55,14 +61,6 @@ _(none ruled out yet)_
 
 ## Open Tickets
 
-### 🎫 Ticket 3: PDF & Document Text Extraction Strategy
-`wayfinder:research` · AFK · **FRONTIER** ✅
-
-#### Question
-How do we extract readable text from uploaded course resources (PDFs, DOCX, PPTX) for AI prompting?
-
----
-
 ### 🎫 Ticket 6: Prompt Engineering Strategy
 `wayfinder:research` · AFK · **FRONTIER** ✅
 
@@ -80,7 +78,7 @@ Technical implementation of the AMD JS module and Mustache templates for inline 
 ---
 
 ### 🎫 Ticket 10: Database Schema Finalization
-`wayfinder:task` · AFK · **FRONTIER** ✅ (unblocked by Ticket 9)
+`wayfinder:task` · AFK · **FRONTIER** ✅
 
 #### Question
 Verify and finalize `db/install.xml` tables for sessions, questions tracking, and edit metrics.

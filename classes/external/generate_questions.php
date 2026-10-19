@@ -64,18 +64,16 @@ class generate_questions extends external_api {
         self::validate_context($context);
         require_capability('local/aiquizgen:generate', $context);
 
-        // Gather text excerpts from selected files.
+        // Gather text excerpts from selected files using robust text extractor.
         $fs = get_file_storage();
         $excerpts = [];
         foreach ($params['fileids'] as $fid) {
             $file = $fs->get_file_by_id($fid);
             if ($file && !$file->is_directory()) {
-                // Extract text content or basic snippet.
-                $content = $file->get_content();
-                // Take clean text snippet up to 4000 characters per file.
-                $clean = strip_tags($content);
-                $clean = preg_replace('/\s+/', ' ', $clean);
-                $excerpts[] = "--- File: " . $file->get_filename() . " ---\n" . mb_substr($clean, 0, 4000);
+                $extracted = \local_aiquizgen\text_extractor::extract_text($file, 4000);
+                if (!empty($extracted)) {
+                    $excerpts[] = "--- File: " . $file->get_filename() . " ---\n" . $extracted;
+                }
             }
         }
         $resourcetext = implode("\n\n", $excerpts);
