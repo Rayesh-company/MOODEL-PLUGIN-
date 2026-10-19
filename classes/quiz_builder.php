@@ -97,6 +97,10 @@ class quiz_builder {
                 $formdata->shuffleanswers = 1;
                 $formdata->answernumbering = 'abc';
                 $formdata->showstandardinstruction = 0;
+                $formdata->correctfeedback = ['text' => '', 'format' => FORMAT_HTML];
+                $formdata->partiallycorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+                $formdata->incorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+                $formdata->shownumcorrect = 0;
                 $formdata->noanswers = count($qdata['answers'] ?? []);
                 $formdata->answer = [];
                 $formdata->fraction = [];
@@ -114,6 +118,7 @@ class quiz_builder {
                 $formdata->correctanswer = $isTrue ? 1 : 0;
                 $formdata->feedbacktrue = ['text' => $qdata['feedbacktrue'] ?? 'Correct', 'format' => FORMAT_HTML];
                 $formdata->feedbackfalse = ['text' => $qdata['feedbackfalse'] ?? 'Incorrect', 'format' => FORMAT_HTML];
+                $formdata->showstandardinstruction = 0;
                 break;
 
             case 'shortanswer':
@@ -133,12 +138,17 @@ class quiz_builder {
                 $formdata->responserequired = 1;
                 $formdata->responsefieldlines = 15;
                 $formdata->attachments = 0;
+                $formdata->attachmentsrequired = 0;
                 $formdata->graderinfo = ['text' => $qdata['rubric'] ?? '', 'format' => FORMAT_HTML];
                 $formdata->responsetemplate = ['text' => '', 'format' => FORMAT_HTML];
                 break;
 
             case 'match':
                 $formdata->shuffleanswers = 1;
+                $formdata->correctfeedback = ['text' => '', 'format' => FORMAT_HTML];
+                $formdata->partiallycorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+                $formdata->incorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+                $formdata->shownumcorrect = 0;
                 $formdata->subquestions = [];
                 $formdata->subanswers = [];
                 foreach ($qdata['pairs'] as $idx => $pair) {
@@ -155,7 +165,9 @@ class quiz_builder {
         }
 
         $qtypeobj = question_bank::get_qtype($qtype);
-        $saved = $qtypeobj->save_question(new stdClass(), $formdata);
+        $question = new stdClass();
+        $question->qtype = $qtype;
+        $saved = $qtypeobj->save_question($question, $formdata);
         return $saved->id;
     }
 
@@ -199,6 +211,8 @@ class quiz_builder {
         $quizdata->shuffleanswers = 1;
         $quizdata->sumgrades = 0;
         $quizdata->grade = 10;
+        $quizdata->quizpassword = '';
+        $quizdata->password = '';
 
         $createdcm = add_moduleinfo($quizdata, $course);
         $quizid = $createdcm->instance;
@@ -212,7 +226,11 @@ class quiz_builder {
             quiz_add_quiz_question($qid, $quiz, 0, 1.0);
         }
 
-        quiz_update_sumgrades($quiz);
+        if (class_exists('\mod_quiz\quiz_settings')) {
+            \mod_quiz\quiz_settings::create($quizid)->get_grade_calculator()->recompute_quiz_sumgrades();
+        } else if (function_exists('quiz_update_sumgrades')) {
+            quiz_update_sumgrades($quiz);
+        }
         return $quizid;
     }
 }
