@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>پیش‌نمایش آزمون‌ساز هوشمند مودل</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased p-3 sm:p-5">
+
+  <!-- Moodle Simulated Course Page Container -->
+  <div class="max-w-5xl mx-auto bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl overflow-hidden transition-all">
+    
+    <!-- Moodle Boost Course Header Bar -->
+    <div class="bg-[var(--sidebar)] border-b border-[var(--border)] px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600/10 text-blue-600 flex items-center justify-center font-bold text-lg">
+          🎓
+        </div>
+        <div>
+          <div class="text-xs text-[var(--muted-foreground)]">دانشگاه امام رضا (ع) • نیم‌سال اول</div>
+          <h1 class="text-base sm:text-lg font-bold text-[var(--foreground)]">هوش مصنوعی و یادگیری ماشین (کد: CS-402)</h1>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          هسته هوش مصنوعی مودل متصل است
+        </span>
+      </div>
+    </div>
+
+    <!-- Moodle Secondary Navigation Tabs -->
+    <div class="flex border-b border-[var(--border)] bg-[var(--background)] px-6 overflow-x-auto text-sm font-medium">
+      <button class="py-3 px-4 text-[var(--muted-foreground)] hover:text-[var(--foreground)] border-b-2 border-transparent">صفحه درس</button>
+      <button class="py-3 px-4 text-[var(--muted-foreground)] hover:text-[var(--foreground)] border-b-2 border-transparent">تنظیمات</button>
+      <button class="py-3 px-4 text-[var(--muted-foreground)] hover:text-[var(--foreground)] border-b-2 border-transparent">شرکت‌کنندگان</button>
+      <button class="py-3 px-4 text-[var(--muted-foreground)] hover:text-[var(--foreground)] border-b-2 border-transparent">نمرات</button>
+      <button class="py-3 px-4 text-blue-600 border-b-2 border-blue-600 font-bold flex items-center gap-2">
+        <span>✨ آزمون‌ساز هوشمند</span>
+        <span class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">ویژه استاد</span>
+      </button>
+      <button class="py-3 px-4 text-[var(--muted-foreground)] hover:text-[var(--foreground)] border-b-2 border-transparent">بانک سوالات</button>
+    </div>
+
+    <!-- Wizard Stepper Indicator -->
+    <div class="p-6 bg-[var(--background)]/50 border-b border-[var(--border)]">
+      <div class="grid grid-cols-4 gap-2 text-center text-xs sm:text-sm font-semibold">
+        <!-- Step 1 Tab -->
+        <button onclick="goToStep(1)" id="step-tab-1" class="step-tab flex flex-col sm:flex-row items-center justify-center gap-2 p-2.5 rounded-xl transition-all border border-blue-600 bg-blue-50/10 text-blue-600 font-bold shadow-sm">
+          <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs bg-blue-600 text-white font-bold">۱</span>
+          <span>انتخاب منابع</span>
+        </button>
+        <!-- Step 2 Tab -->
+        <button onclick="goToStep(2)" id="step-tab-2" class="step-tab flex flex-col sm:flex-row items-center justify-center gap-2 p-2.5 rounded-xl transition-all border border-transparent text-[var(--muted-foreground)] hover:bg-[var(--card)]">
+          <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs bg-[var(--border)] text-[var(--muted-foreground)] font-bold">۲</span>
+          <span>تنظیمات آزمون</span>
+        </button>
+        <!-- Step 3 Tab -->
+        <button onclick="goToStep(3)" id="step-tab-3" class="step-tab flex flex-col sm:flex-row items-center justify-center gap-2 p-2.5 rounded-xl transition-all border border-transparent text-[var(--muted-foreground)] hover:bg-[var(--card)]">
+          <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs bg-[var(--border)] text-[var(--muted-foreground)] font-bold">۳</span>
+          <span>پیش‌نمایش و اصلاح</span>
+        </button>
+        <!-- Step 4 Tab -->
+        <button onclick="goToStep(4)" id="step-tab-4" class="step-tab flex flex-col sm:flex-row items-center justify-center gap-2 p-2.5 rounded-xl transition-all border border-transparent text-[var(--muted-foreground)] hover:bg-[var(--card)]">
+          <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs bg-[var(--border)] text-[var(--muted-foreground)] font-bold">۴</span>
+          <span>تأیید و انتشار</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN BODY CONTENT -->
+    <div class="p-6">
+
+      <!-- ================= STEP 1: SELECT RESOURCES ================= -->
+      <div id="step-1" class="wizard-step space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
+            <span>📚 گام اول: انتخاب منابع درسی برای طراحی آزمون</span>
+          </h2>
+          <p class="text-sm text-[var(--muted-foreground)] mt-1">
+            فایل‌های بارگذاری‌شده در درس را تیک بزنید یا متن تدریس دلخواه خود را مستقیماً وارد کنید.
+          </p>
+        </div>
+
+        <!-- Course Files List (Auto-scanned via Moodle File API) -->
+        <div class="border border-[var(--border)] rounded-xl overflow-hidden bg-[var(--card)]">
+          <div class="bg-[var(--sidebar)] px-4 py-3 border-b border-[var(--border)] flex justify-between items-center text-xs font-semibold text-[var(--muted-foreground)]">
+            <span class="flex items-center gap-2">
+              <input type="checkbox" id="select-all-files" checked onchange="toggleSelectAllFiles(this)" class="rounded text-blue-600 focus:ring-0">
+              <span>فایل‌های موجود در این درس (شناسایی خودکار)</span>
+            </span>
+            <span>حجم / فرمت</span>
+          </div>
+          <div class="divide-y divide-[var(--border)] text-sm">
+            <!-- File 1 -->
+            <label class="flex items-center justify-between px-4 py-3 hover:bg-[var(--background)] cursor-pointer">
+              <div class="flex items-center gap-3">
+                <input type="checkbox" checked class="file-chk rounded text-blue-600 focus:ring-0">
+                <span class="text-xl">📄</span>
+                <div>
+                  <div class="font-medium text-[var(--foreground)]">فصل ۱ و ۲ - مقدمه‌ای بر شبکه‌های عصبی و یادگیری عمیق.pdf</div>
+                  <div class="text-xs text-[var(--muted-foreground)]">بخش ۱ درس • بارگذاری شده توسط شما</div>
+                </div>
+              </div>
+              <span class="text-xs text-[var(--muted-foreground)] font-mono">۴.۲ MB • PDF</span>
+            </label>
+            <!-- File 2 -->
+            <label class="flex items-center justify-between px-4 py-3 hover:bg-[var(--background)] cursor-pointer">
+              <div class="flex items-center gap-3">
+                <input type="checkbox" checked class="file-chk rounded text-blue-600 focus:ring-0">
+                <span class="text-xl">📊</span>
+                <div>
+                  <div class="font-medium text-[var(--foreground)]">اسلایدهای جلسه ۳ و ۴ - الگوریتم گرادیان کاهشی و Backpropagation.pptx</div>
+                  <div class="text-xs text-[var(--muted-foreground)]">بخش ۲ درس</div>
+                </div>
+              </div>
+              <span class="text-xs text-[var(--muted-foreground)] font-mono">۷.۸ MB • PPTX</span>
+            </label>
+            <!-- File 3 -->
+            <label class="flex items-center justify-between px-4 py-3 hover:bg-[var(--background)] cursor-pointer">
+              <div class="flex items-center gap-3">
+                <input type="checkbox" class="file-chk rounded text-blue-600 focus:ring-0">
+                <span class="text-xl">📝</span>
+                <div>
+                  <div class="font-medium text-[var(--foreground)]">خلاصه مفاهیم توابع زیان و Overfitting.docx</div>
+                  <div class="text-xs text-[var(--muted-foreground)]">بخش ۳ درس</div>
+                </div>
+              </div>
+              <span class="text-xs text-[var(--muted-foreground)] font-mono">۴۵۰ KB • DOCX</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Optional Additional Direct Text / Custom Topics -->
+        <div class="border border-[var(--border)] rounded-xl p-4 bg-[var(--card)] space-y-2">
+          <label class="block text-xs font-bold text-[var(--foreground)]">
+            ✍️ یادداشت‌های تدریس، نکات کلیدی یا متن اضافی (اختیاری):
+          </label>
+          <textarea id="custom-text-input" rows="3" placeholder="مثال: حتماً از مبحث توابع فعال‌سازی ReLU و Sigmoid و تفاوت Overfitting با Underfitting حداقل ۲ سوال طرح شود..." class="w-full text-xs p-3 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <!-- Step 1 Footer Action -->
+        <div class="flex justify-end pt-2">
+          <button onclick="goToStep(2)" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow transition-all flex items-center gap-2">
+            <span>مرحله بعد: تنظیم پارامترهای آزمون</span>
+            <span>←</span>
+          </button>
+        </div>
+      </div>
+
+
+      <!-- ================= STEP 2: CONFIGURE PARAMETERS ================= -->
+      <div id="step-2" class="wizard-step hidden space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
+            <span>⚙️ گام دوم: مشخصات و ساختار آزمون</span>
+          </h2>
+          <p class="text-sm text-[var(--muted-foreground)] mt-1">
+            سطح سختی، ترکیب سوالات دانشگاهی و هدف آموزشی آزمون را تعیین کنید.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Left Column: Counts and Levels -->
+          <div class="space-y-4">
+            <!-- Question Count -->
+            <div class="border border-[var(--border)] rounded-xl p-4 bg-[var(--card)]">
+              <div class="flex justify-between items-center mb-2">
+                <label class="text-xs font-bold text-[var(--foreground)]">تعداد کل سوالات آزمون:</label>
+                <span id="question-count-display" class="font-bold text-blue-600 text-sm bg-blue-50 px-2 py-0.5 rounded">۱۰ سوال</span>
+              </div>
+              <input type="range" id="question-count-slider" min="3" max="30" value="10" oninput="updateCount(this.value)" class="w-full accent-blue-600 cursor-pointer">
+              <div class="flex justify-between text-[11px] text-[var(--muted-foreground)] mt-1">
+                <span>۳ سوال (کوتاه)</span>
+                <span>۱۵ سوال (میان‌ترم)</span>
+                <span>۳۰ سوال (جامع)</span>
+              </div>
+            </div>
+
+            <!-- Difficulty Level -->
+            <div class="border border-[var(--border)] rounded-xl p-4 bg-[var(--card)]">
+              <label class="block text-xs font-bold text-[var(--foreground)] mb-2">سطح دشواری و استاندارد دانشگاهی:</label>
+              <div class="grid grid-cols-3 gap-2 text-xs">
+                <label class="border border-[var(--border)] rounded-lg p-2.5 text-center cursor-pointer hover:bg-[var(--background)] flex flex-col items-center gap-1">
+                  <input type="radio" name="difficulty" value="standard" class="accent-blue-600">
+                  <span class="font-bold">مفهومی و پایه</span>
+                  <span class="text-[10px] text-[var(--muted-foreground)]">یادآوری و درک</span>
+                </label>
+                <label class="border border-blue-600 bg-blue-50/10 rounded-lg p-2.5 text-center cursor-pointer flex flex-col items-center gap-1">
+                  <input type="radio" name="difficulty" value="analytical" checked class="accent-blue-600">
+                  <span class="font-bold text-blue-600">تحلیلی و کاربردی</span>
+                  <span class="text-[10px] text-blue-500">حل مسئله</span>
+                </label>
+                <label class="border border-[var(--border)] rounded-lg p-2.5 text-center cursor-pointer hover:bg-[var(--background)] flex flex-col items-center gap-1">
+                  <input type="radio" name="difficulty" value="hard" class="accent-blue-600">
+                  <span class="font-bold">پیشرفته و چالشی</span>
+                  <span class="text-[10px] text-[var(--muted-foreground)]">ارزیابی عمیق</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Language and Bloom Taxonomy -->
+            <div class="grid grid-cols-2 gap-3">
+              <div class="border border-[var(--border)] rounded-xl p-3 bg-[var(--card)]">
+                <label class="block text-xs font-bold text-[var(--foreground)] mb-1">زبان سوالات:</label>
+                <select class="w-full text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+                  <option selected>فارسی (روان و دانشگاهی)</option>
+                  <option>انگلیسی (تخصصی)</option>
+                  <option>دو زبانه (فارسی با اصطلاحات انگلیسی)</option>
+                </select>
+              </div>
+              <div class="border border-[var(--border)] rounded-xl p-3 bg-[var(--card)]">
+                <label class="block text-xs font-bold text-[var(--foreground)] mb-1">مدل هوش مصنوعی:</label>
+                <select class="w-full text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+                  <option selected>پیش‌فرض سیستم مودل (DeepSeek-R1)</option>
+                  <option>Google Gemini 2.5 Flash</option>
+                  <option>OpenAI GPT-4o</option>
+                  <option>Ollama (سرور بومی دانشگاه)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: 6 Question Types Selection -->
+          <div class="border border-[var(--border)] rounded-xl p-4 bg-[var(--card)] space-y-3">
+            <div class="flex justify-between items-center">
+              <label class="text-xs font-bold text-[var(--foreground)]">انواع سوالات مورد نظر (ترکیب دلخواه):</label>
+              <span class="text-[11px] text-blue-600 cursor-pointer" onclick="toggleAllQTypes()">انتخاب همه</span>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <label class="flex items-center justify-between p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--background)] cursor-pointer">
+                <span class="flex items-center gap-2">
+                  <input type="checkbox" checked class="qtype-chk rounded text-blue-600">
+                  <span class="font-bold">چهارگزینه‌ای (Multiple Choice)</span>
+                </span>
+                <span class="text-[10px] text-[var(--muted-foreground)] bg-[var(--sidebar)] px-2 py-0.5 rounded">۴ گزینه با بازخورد</span>
+              </label>
+
+              <label class="flex items-center justify-between p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--background)] cursor-pointer">
+                <span class="flex items-center gap-2">
+                  <input type="checkbox" checked class="qtype-chk rounded text-blue-600">
+                  <span class="font-bold">صحیح / غلط (True/False)</span>
+                </span>
+                <span class="text-[10px] text-[var(--muted-foreground)] bg-[var(--sidebar)] px-2 py-0.5 rounded">توجیه علمی پاسخ</span>
+              </label>
+
+              <label class="flex items-center justify-between p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--background)] cursor-pointer">
+                <span class="flex items-center gap-2">
+                  <input type="checkbox" checked class="qtype-chk rounded text-blue-600">
+                  <span class="font-bold">کوتاه‌پاسخ (Short Answer)</span>
+                </span>
+                <span class="text-[10px] text-[var(--muted-foreground)] bg-[var(--sidebar)] px-2 py-0.5 rounded">تصحیح خودکار با کلمات کلیدی</span>
+              </label>
+
+              <label class="flex items-center justify-between p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--background)] cursor-pointer">
+                <span class="flex items-center gap-2">
+                  <input type="checkbox" checked class="qtype-chk rounded text-blue-600">
+                  <span class="font-bold">تشریحی (Essay)</span>
+                </span>
+                <span class="text-[10px] text-[var(--muted-foreground)] bg-[var(--sidebar)] px-2 py-0.5 rounded">همراه با راهنمای تصحیح استاد</span>
+              </label>
+
+              <label class="flex items-center justify-between p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--background)] cursor-pointer">
+                <span class="flex items-center gap-2">
+                  <input type="checkbox" checked class="qtype-chk rounded text-blue-600">
+                  <span class="font-bold">تطبیقی / جورکردنی (Matching)</span>
+                </span>
+                <span class="text-[10px] text-[var(--muted-foreground)] bg-[var(--sidebar)] px-2 py-0.5 rounded">تطابق تعاریف و مفاهیم</span>
+              </label>
+
+              <label class="flex items-center justify-between p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--background)] cursor-pointer">
+                <span class="flex items-center gap-2">
+                  <input type="checkbox" checked class="qtype-chk rounded text-blue-600">
+                  <span class="font-bold">مرتب‌سازی (Ordering)</span>
+                </span>
+                <span class="text-[10px] text-[var(--muted-foreground)] bg-[var(--sidebar)] px-2 py-0.5 rounded">ترتیب مراحل الگوریتم</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 Actions -->
+        <div class="flex justify-between items-center pt-2">
+          <button onclick="goToStep(1)" class="px-5 py-2 border border-[var(--border)] hover:bg-[var(--background)] text-sm rounded-xl transition-all">
+            → مرحله قبل
+          </button>
+          <button onclick="startAIGeneration()" class="px-7 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all flex items-center gap-2 transform active:scale-95">
+            <span class="text-lg">✨</span>
+            <span>تولید هوشمند سوالات آزمون</span>
+            <span>←</span>
+          </button>
+        </div>
+      </div>
+
+
+      <!-- ================= STEP 3: PREVIEW & REGENERATE ================= -->
+      <div id="step-3" class="wizard-step hidden space-y-6">
+        
+        <!-- Top Review Header -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-blue-50/10 border border-blue-500/20 p-4 rounded-xl">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xl">✅</span>
+              <h2 class="text-base font-bold text-[var(--foreground)]">سوالات با موفقیت تولید شدند</h2>
+              <span class="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">۶ سوال دانشگاهی</span>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)] mt-1">
+              می‌توانید متن هر سوال یا پاسخ‌ها را مستقیماً ویرایش کنید، سوالی را حذف کنید یا با نوشتن پرامپت اختصاصی از هوش مصنوعی بخواهید آن را بازتولید کند.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="addNewQuestionCard()" class="px-3 py-1.5 border border-dashed border-blue-600 text-blue-600 hover:bg-blue-50/10 text-xs font-bold rounded-lg flex items-center gap-1">
+              <span>+ افزودن سوال دستی</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- QUESTIONS PREVIEW LIST (Cards for each type) -->
+        <div id="questions-list" class="space-y-4">
+
+          <!-- QUESTION 1: MULTIPLE CHOICE -->
+          <div class="q-card border border-[var(--border)] rounded-xl p-5 bg-[var(--card)] shadow-sm space-y-4 relative group" data-qid="1">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-md bg-blue-600 text-white text-xs font-bold flex items-center justify-center">۱</span>
+                <span class="text-xs font-bold bg-blue-500/10 text-blue-600 px-2 py-0.5 rounded">چهارگزینه‌ای</span>
+                <span class="text-xs text-[var(--muted-foreground)]">نمره: ۱.۰</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="toggleCardEdit(1)" class="px-2.5 py-1 text-xs border border-[var(--border)] hover:bg-[var(--background)] rounded-md">✏️ ویرایش سریع</button>
+                <button onclick="deleteCard(1)" class="px-2 py-1 text-xs text-red-500 hover:bg-red-500/10 rounded-md">🗑️ حذف</button>
+              </div>
+            </div>
+
+            <!-- Question Body (Editable) -->
+            <div class="space-y-2">
+              <div id="qtext-1" contenteditable="false" class="text-sm font-semibold text-[var(--foreground)] p-1 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+                در فرآیند آموزش شبکه‌های عصبی عمیق، پدیده محو شدگی گرادیان (Vanishing Gradient) بیشتر ناشی از کدام ویژگی در توابع فعال‌سازی قدیمی مانند Sigmoid است؟
+              </div>
+              
+              <!-- Options -->
+              <div class="space-y-1.5 text-xs">
+                <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 font-medium">
+                  <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+                  <span>مشتق تابع در مقادیر بسیار بزرگ یا کوچک ورودی نزدیک به صفر می‌شود (پاسخ صحیح - ۱۰۰٪)</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)]">
+                  <span class="w-5 h-5 rounded-full bg-[var(--border)] text-[var(--muted-foreground)] flex items-center justify-center text-[10px]">✕</span>
+                  <span>خروجی تابع در بازه منفی بینهایت تا مثبت بینهایت گسترده است</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)]">
+                  <span class="w-5 h-5 rounded-full bg-[var(--border)] text-[var(--muted-foreground)] flex items-center justify-center text-[10px]">✕</span>
+                  <span>محاسبه مشتق آن نیازمند منابع پردازشی بسیار سنگین سخت‌افزاری است</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)]">
+                  <span class="w-5 h-5 rounded-full bg-[var(--border)] text-[var(--muted-foreground)] flex items-center justify-center text-[10px]">✕</span>
+                  <span>تابع در نقطه صفر پیوسته اما مشتق‌ناپذیر است</span>
+                </div>
+              </div>
+
+              <!-- General Feedback -->
+              <div class="text-[11px] text-[var(--muted-foreground)] bg-[var(--sidebar)] p-2 rounded border border-[var(--border)]">
+                💡 <b>بازخورد تشریحی برای دانشجو:</b> مشتق تابع زیگموئید حداکثر ۰.۲۵ است؛ با ضرب متوالی مشتق‌ها در لایه‌های عمیق طبق قاعده زنجیره‌ای، گرادیان لایه‌های ابتدایی صفر می‌شود.
+              </div>
+            </div>
+
+            <!-- AI Micro-Regenerate Input (Teacher Control) -->
+            <div class="pt-2 border-t border-[var(--border)] flex items-center gap-2">
+              <input type="text" id="reprompt-1" placeholder="دستور بازتولید: مثلاً «گزینه‌ها رو چالش‌برانگیزتر کن» یا «سوال رو عددی کن»..." class="flex-1 text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <button onclick="repromptAI(1)" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm">
+                <span>🔄 بازتولید با AI</span>
+              </button>
+            </div>
+          </div>
+
+
+          <!-- QUESTION 2: TRUE / FALSE -->
+          <div class="q-card border border-[var(--border)] rounded-xl p-5 bg-[var(--card)] shadow-sm space-y-4" data-qid="2">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-md bg-purple-600 text-white text-xs font-bold flex items-center justify-center">۲</span>
+                <span class="text-xs font-bold bg-purple-500/10 text-purple-600 px-2 py-0.5 rounded">صحیح / غلط</span>
+                <span class="text-xs text-[var(--muted-foreground)]">نمره: ۱.۰</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="toggleCardEdit(2)" class="px-2.5 py-1 text-xs border border-[var(--border)] hover:bg-[var(--background)] rounded-md">✏️ ویرایش سریع</button>
+                <button onclick="deleteCard(2)" class="px-2 py-1 text-xs text-red-500 hover:bg-red-500/10 rounded-md">🗑️ حذف</button>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div id="qtext-2" class="text-sm font-semibold text-[var(--foreground)]">
+                افزودن جملات منظم‌سازی (Regularization مانند L2) به تابع هدف، باعث کاهش بیش‌برازش (Overfitting) می‌شود، اما ممکن است خطای داده‌های آموزش (Training Error) را اندکی افزایش دهد.
+              </div>
+              <div class="flex items-center gap-3 text-xs">
+                <span class="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 font-bold">
+                  ✓ پاسخ صحیح: درست (True)
+                </span>
+              </div>
+              <div class="text-[11px] text-[var(--muted-foreground)] bg-[var(--sidebar)] p-2 rounded border border-[var(--border)]">
+                💡 <b>توضیح:</b> منظم‌سازی وزن‌های بزرگ را جریمه می‌کند و مدل را ساده‌تر نگه می‌دارد تا تعمیم‌پذیری بالا رود، در نتیجه خطای روی داده آموزش معمولاً کمی بیشتر می‌شود.
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-[var(--border)] flex items-center gap-2">
+              <input type="text" id="reprompt-2" placeholder="دستور بازتولید برای این سوال..." class="flex-1 text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+              <button onclick="repromptAI(2)" class="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm">
+                <span>🔄 بازتولید با AI</span>
+              </button>
+            </div>
+          </div>
+
+
+          <!-- QUESTION 3: SHORT ANSWER -->
+          <div class="q-card border border-[var(--border)] rounded-xl p-5 bg-[var(--card)] shadow-sm space-y-4" data-qid="3">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-md bg-amber-600 text-white text-xs font-bold flex items-center justify-center">۳</span>
+                <span class="text-xs font-bold bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded">کوتاه‌پاسخ</span>
+                <span class="text-xs text-[var(--muted-foreground)]">نمره: ۱.۰</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="toggleCardEdit(3)" class="px-2.5 py-1 text-xs border border-[var(--border)] hover:bg-[var(--background)] rounded-md">✏️ ویرایش سریع</button>
+                <button onclick="deleteCard(3)" class="px-2 py-1 text-xs text-red-500 hover:bg-red-500/10 rounded-md">🗑️ حذف</button>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div id="qtext-3" class="text-sm font-semibold text-[var(--foreground)]">
+                نام لایه‌ای در شبکه‌های کانولوشنی (CNN) که ابعاد مکانی ویژگی‌ها را کاهش داده و هزینه محاسباتی را پایین می‌آورد چیست؟ (فارسی یا انگلیسی)
+              </div>
+              <div class="text-xs bg-[var(--background)] border border-[var(--border)] p-2.5 rounded-lg space-y-1">
+                <div class="text-[11px] text-[var(--muted-foreground)] font-bold">پاسخ‌های مجاز مورد پذیرش سیستم مودل:</div>
+                <div class="flex flex-wrap gap-2 text-xs">
+                  <span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-200">Pooling (100%)</span>
+                  <span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-200">پولینگ (100%)</span>
+                  <span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-200">Max Pooling (100%)</span>
+                  <span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-200">ادغام (100%)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-[var(--border)] flex items-center gap-2">
+              <input type="text" id="reprompt-3" placeholder="دستور بازتولید برای این سوال..." class="flex-1 text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+              <button onclick="repromptAI(3)" class="px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm">
+                <span>🔄 بازتولید با AI</span>
+              </button>
+            </div>
+          </div>
+
+
+          <!-- QUESTION 4: MATCHING -->
+          <div class="q-card border border-[var(--border)] rounded-xl p-5 bg-[var(--card)] shadow-sm space-y-4" data-qid="4">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-md bg-teal-600 text-white text-xs font-bold flex items-center justify-center">۴</span>
+                <span class="text-xs font-bold bg-teal-500/10 text-teal-600 px-2 py-0.5 rounded">جورکردنی (Matching)</span>
+                <span class="text-xs text-[var(--muted-foreground)]">نمره: ۲.۰</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="toggleCardEdit(4)" class="px-2.5 py-1 text-xs border border-[var(--border)] hover:bg-[var(--background)] rounded-md">✏️ ویرایش سریع</button>
+                <button onclick="deleteCard(4)" class="px-2 py-1 text-xs text-red-500 hover:bg-red-500/10 rounded-md">🗑️ حذف</button>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div id="qtext-4" class="text-sm font-semibold text-[var(--foreground)]">
+                هر یک از بهینه‌سازهای (Optimizers) زیر را به مشخصه یا ویژگی کلیدی آن متصل کنید:
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div class="p-2 bg-[var(--background)] border border-[var(--border)] rounded flex justify-between">
+                  <span>۱. SGD with Momentum</span>
+                  <span class="text-teal-600 font-bold">← اثر شتاب و میانگین متحرک گرادیان گذشته</span>
+                </div>
+                <div class="p-2 bg-[var(--background)] border border-[var(--border)] rounded flex justify-between">
+                  <span>۲. RMSProp</span>
+                  <span class="text-teal-600 font-bold">← تقسیم نرخ یادگیری بر ریشه مربع گرادیان‌های نمایی</span>
+                </div>
+                <div class="p-2 bg-[var(--background)] border border-[var(--border)] rounded flex justify-between">
+                  <span>۳. Adam</span>
+                  <span class="text-teal-600 font-bold">← ترکیب مزایای Momentum و گشتاورهای مرتبه اول و دوم</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-[var(--border)] flex items-center gap-2">
+              <input type="text" id="reprompt-4" placeholder="دستور بازتولید برای این سوال..." class="flex-1 text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+              <button onclick="repromptAI(4)" class="px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm">
+                <span>🔄 بازتولید با AI</span>
+              </button>
+            </div>
+          </div>
+
+
+          <!-- QUESTION 5: ESSAY -->
+          <div class="q-card border border-[var(--border)] rounded-xl p-5 bg-[var(--card)] shadow-sm space-y-4" data-qid="5">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-md bg-rose-600 text-white text-xs font-bold flex items-center justify-center">۵</span>
+                <span class="text-xs font-bold bg-rose-500/10 text-rose-600 px-2 py-0.5 rounded">تشریحی (تحلیلی)</span>
+                <span class="text-xs text-[var(--muted-foreground)]">نمره: ۳.۰</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="toggleCardEdit(5)" class="px-2.5 py-1 text-xs border border-[var(--border)] hover:bg-[var(--background)] rounded-md">✏️ ویرایش سریع</button>
+                <button onclick="deleteCard(5)" class="px-2 py-1 text-xs text-red-500 hover:bg-red-500/10 rounded-md">🗑️ حذف</button>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div id="qtext-5" class="text-sm font-semibold text-[var(--foreground)]">
+                مکانیزم Attention در شبکه‌های ترنسفورمر را با مدل‌های سنتی RNN مقایسه نمایید و توضیح دهید چرا Attention مشکل وابستگی‌های طولانی‌مدت (Long-term dependencies) را به طور ریشه‌ای حل کرد؟ (حداقل ۱۵۰ کلمه)
+              </div>
+              <div class="text-[11px] text-[var(--muted-foreground)] bg-rose-500/10 p-2.5 rounded border border-rose-500/20">
+                📋 <b>راهنمای تصحیح برای استاد (Rubric):</b>
+                نمره کامل شامل: ۱) اشاره به گلوگاه بردار پنهان با اندازه ثابت در RNN (۱ نمره)، ۲) توضیح نحوه محاسبه ماتریس وزن‌های Attention بین تمامی کلمات توکن‌شده بدون در نظر گرفتن فاصله زمانی (۱ نمره)، ۳) قابلیت پردازش موازی و کاهش پیچیدگی زمانی مسیر گرادیان (۱ نمره).
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-[var(--border)] flex items-center gap-2">
+              <input type="text" id="reprompt-5" placeholder="دستور بازتولید برای این سوال..." class="flex-1 text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+              <button onclick="repromptAI(5)" class="px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm">
+                <span>🔄 بازتولید با AI</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Step 3 Footer Actions -->
+        <div class="flex justify-between items-center pt-4 border-t border-[var(--border)]">
+          <button onclick="goToStep(2)" class="px-5 py-2 border border-[var(--border)] hover:bg-[var(--background)] text-sm rounded-xl transition-all">
+            → بازگشت به تنظیمات
+          </button>
+          <button onclick="goToStep(4)" class="px-7 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all flex items-center gap-2">
+            <span>مرحله بعد: تنظیمات انتشار در مودل</span>
+            <span>←</span>
+          </button>
+        </div>
+      </div>
+
+
+      <!-- ================= STEP 4: PUBLISH TO MOODLE ================= -->
+      <div id="step-4" class="wizard-step hidden space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
+            <span>🚀 گام چهارم: تأیید نهایی و انتشار در پلتفرم مودل</span>
+          </h2>
+          <p class="text-sm text-[var(--muted-foreground)] mt-1">
+            مشخصات آزمون مودل را وارد کنید. پس از کلیک بر روی دکمه انتشار، سوالات وارد بانک سوالات شده و یک آزمون آماده در صفحه درس ایجاد خواهد شد.
+          </p>
+        </div>
+
+        <!-- Summary Statistics Card -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] text-center">
+            <div class="text-xs text-[var(--muted-foreground)]">تعداد کل سوالات</div>
+            <div class="text-xl font-bold text-blue-600 mt-1">۵ سوال</div>
+          </div>
+          <div class="p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] text-center">
+            <div class="text-xs text-[var(--muted-foreground)]">مجموع نمرات</div>
+            <div class="text-xl font-bold text-emerald-600 mt-1">۸.۰ نمره</div>
+          </div>
+          <div class="p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] text-center">
+            <div class="text-xs text-[var(--muted-foreground)]">تنوع سوالات</div>
+            <div class="text-xl font-bold text-purple-600 mt-1">۵ نوع مختلف</div>
+          </div>
+          <div class="p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] text-center">
+            <div class="text-xs text-[var(--muted-foreground)]">سطح کیفی</div>
+            <div class="text-xl font-bold text-amber-600 mt-1">دانشگاهی</div>
+          </div>
+        </div>
+
+        <!-- Moodle Native Quiz Settings -->
+        <div class="border border-[var(--border)] rounded-xl p-5 bg-[var(--card)] space-y-4">
+          <h3 class="text-sm font-bold text-[var(--foreground)] flex items-center gap-2 border-b border-[var(--border)] pb-3">
+            <span>📋 تنظیمات ماژول آزمون مودل (mod_quiz)</span>
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block font-bold text-[var(--foreground)] mb-1">عنوان آزمون در درس:</label>
+              <input type="text" value="کوییز کلاسی شماره ۱: شبکه‌های عصبی و یادگیری عمیق" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] font-medium">
+            </div>
+
+            <div>
+              <label class="block font-bold text-[var(--foreground)] mb-1">نام دسته در بانک سوالات (Question Category):</label>
+              <input type="text" value="آزمون‌های AI / نیم‌سال اول ۱۴۰۵ / فصل ۱ و ۲" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] font-medium">
+            </div>
+
+            <div>
+              <label class="block font-bold text-[var(--foreground)] mb-1">محدودیت زمانی (Time Limit):</label>
+              <div class="flex items-center gap-2">
+                <input type="number" value="30" class="w-24 p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+                <span class="text-[var(--muted-foreground)]">دقیقه (۰ = نامحدود)</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-[var(--foreground)] mb-1">تعداد دفعات مجاز شرکت در آزمون:</label>
+              <select class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+                <option selected>۱ بار (استاندارد)</option>
+                <option>۲ بار (با میانگین نمرات)</option>
+                <option>نامحدود (آزمون تمرینی)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-bold text-[var(--foreground)] mb-1">نحوه چیدمان سوالات:</label>
+              <select class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+                <option selected>هر سوال در یک صفحه جداگانه</option>
+                <option>همه سوالات در یک صفحه</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-bold text-[var(--foreground)] mb-1">رفتار بازخورد (Question Behaviour):</label>
+              <select class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+                <option selected>بازخورد معوق (Deferred feedback - پس از ارسال نهایی)</option>
+                <option>بازخورد فوری (Immediate feedback)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Final Gate Action -->
+        <div class="flex justify-between items-center pt-2">
+          <button onclick="goToStep(3)" class="px-5 py-2 border border-[var(--border)] hover:bg-[var(--background)] text-sm rounded-xl transition-all">
+            → بازگشت به پیش‌نمایش و اصلاح
+          </button>
+          <button onclick="executeFinalPublish()" id="btn-publish" class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xl transition-all flex items-center gap-2 text-base transform active:scale-95">
+            <span>✅ تأیید استاد و ساخت آزمون در مودل</span>
+          </button>
+        </div>
+
+        <!-- Success Modal / Alert State (Hidden by default) -->
+        <div id="publish-success" class="hidden border border-emerald-500/30 bg-emerald-500/10 p-6 rounded-2xl text-center space-y-3">
+          <div class="text-4xl">🎉</div>
+          <h4 class="text-base font-bold text-emerald-700">آزمون با موفقیت در مودل ایجاد و منتشر شد!</h4>
+          <p class="text-xs text-[var(--muted-foreground)] max-w-md mx-auto">
+            سوالات به بانک سوالات درس اضافه شدند و آزمون «کوییز کلاسی شماره ۱» در بخش ۲ درس در دسترس دانشجویان قرار گرفت.
+          </p>
+          <div class="flex justify-center gap-3 pt-2">
+            <button class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold shadow hover:bg-emerald-700">مشاهده آزمون در مودل</button>
+            <button onclick="location.reload()" class="px-4 py-2 border border-[var(--border)] rounded-lg text-xs hover:bg-[var(--background)]">طراحی آزمون جدید</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // State
+    let currentStep = 1;
+
+    function goToStep(step) {
+      currentStep = step;
+      document.querySelectorAll('.wizard-step').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`step-${step}`).classList.remove('hidden');
+
+      // Update Tab Styles
+      for (let i = 1; i <= 4; i++) {
+        const tab = document.getElementById(`step-tab-${i}`);
+        const badge = tab.querySelector('span:first-child');
+        if (i === step) {
+          tab.className = 'step-tab flex flex-col sm:flex-row items-center justify-center gap-2 p-2.5 rounded-xl transition-all border border-blue-600 bg-blue-50/10 text-blue-600 font-bold shadow-sm';
+          badge.className = 'w-6 h-6 rounded-full flex items-center justify-center text-xs bg-blue-600 text-white font-bold';
+        } else if (i < step) {
+          tab.className = 'step-tab flex flex-col sm:flex-row items-center justify-center gap-2 p-2.5 rounded-xl transition-all border border-emerald-500/30 text-emerald-600 hover:bg-[var(--card)]';
+          badge.className = 'w-6 h-6 rounded-full flex items-center justify-center text-xs bg-emerald-500 text-white font-bold';
+          badge.textContent = '✓';
+        } else {
+          tab.className = 'step-tab flex flex-col sm:flex-row items-center justify-center gap-2 p-2.5 rounded-xl transition-all border border-transparent text-[var(--muted-foreground)] hover:bg-[var(--card)]';
+          badge.className = 'w-6 h-6 rounded-full flex items-center justify-center text-xs bg-[var(--border)] text-[var(--muted-foreground)] font-bold';
+          badge.textContent = i;
+        }
+      }
+    }
+
+    function toggleSelectAllFiles(master) {
+      document.querySelectorAll('.file-chk').forEach(c => c.checked = master.checked);
+    }
+
+    function updateCount(val) {
+      document.getElementById('question-count-display').textContent = `${val} سوال`;
+    }
+
+    function toggleAllQTypes() {
+      const chks = document.querySelectorAll('.qtype-chk');
+      const allChecked = Array.from(chks).every(c => c.checked);
+      chks.forEach(c => c.checked = !allChecked);
+    }
+
+    function startAIGeneration() {
+      // Simulate quick generation transition
+      goToStep(3);
+    }
+
+    function toggleCardEdit(qid) {
+      const qtext = document.getElementById(`qtext-${qid}`);
+      const isEditable = qtext.contentEditable === 'true';
+      qtext.contentEditable = !isEditable;
+      if (!isEditable) {
+        qtext.focus();
+        qtext.classList.add('bg-blue-50/20', 'border', 'border-blue-500');
+      } else {
+        qtext.classList.remove('bg-blue-50/20', 'border', 'border-blue-500');
+      }
+    }
+
+    function deleteCard(qid) {
+      const card = document.querySelector(`.q-card[data-qid="${qid}"]`);
+      if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.95)';
+        setTimeout(() => card.remove(), 250);
+      }
+    }
+
+    function repromptAI(qid) {
+      const input = document.getElementById(`reprompt-${qid}`);
+      const prompt = input.value.trim();
+      if (!prompt) return;
+
+      const card = document.querySelector(`.q-card[data-qid="${qid}"]`);
+      card.style.opacity = '0.6';
+
+      setTimeout(() => {
+        card.style.opacity = '1';
+        input.value = '';
+        input.placeholder = `✓ با دستور «${prompt}» اصلاح و بازتولید شد.`;
+      }, 700);
+    }
+
+    function executeFinalPublish() {
+      const btn = document.getElementById('btn-publish');
+      btn.disabled = true;
+      btn.innerHTML = `<span>در حال فراخوانی وب‌سرویس و ساخت آزمون در مودل... ⏳</span>`;
+
+      setTimeout(() => {
+        btn.classList.add('hidden');
+        document.getElementById('publish-success').classList.remove('hidden');
+      }, 1000);
+    }
+
+    function addNewQuestionCard() {
+      const list = document.getElementById('questions-list');
+      const newCard = document.createElement('div');
+      newCard.className = 'q-card border border-[var(--border)] rounded-xl p-5 bg-[var(--card)] shadow-sm space-y-3';
+      newCard.innerHTML = `
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">سوال جدید دستی</span>
+          <button onclick="this.closest('.q-card').remove()" class="text-xs text-red-500">حذف</button>
+        </div>
+        <textarea placeholder="صورت سوال جدید را اینجا بنویسید..." class="w-full text-xs p-2 rounded border border-[var(--border)] bg-[var(--background)]"></textarea>
+      `;
+      list.prepend(newCard);
+    }
+  </script>
+</body>
+</html>

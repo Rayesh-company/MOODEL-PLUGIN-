@@ -1,0 +1,26 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+defined('MOODLE_INTERNAL') || die();
+
+$string['pluginname'] = 'آزمون‌ساز هوشمند';
+$string['aiquizgen:view'] = 'مشاهده آزمون‌ساز هوشمند';
+$string['aiquizgen:generate'] = 'تولید آزمون با هوش مصنوعی';
+$string['aiquizgen:manage'] = 'مدیریت تنظیمات آزمون‌ساز هوشمند';
+$string['settings_general'] = 'تنظیمات عمومی';
+$string['settings_general_desc'] = 'پیکربندی عمومی آزمون‌ساز مبتنی بر هسته هوش مصنوعی مودل.';
+$string['enablecoursetab'] = 'نمایش تب اختصاصی در صفحه درس';
+$string['enablecoursetab_desc'] = 'در صورت فعال بودن، تب «آزمون‌ساز هوشمند» در نوار ناوبری درس به اساتید نمایش داده می‌شود.';
+$string['maxquestions'] = 'حداکثر تعداد سوال در هر درخواست';
+$string['maxquestions_desc'] = 'سقف تعداد سوالاتی که استاد می‌تواند در یک مرحله از هوش مصنوعی درخواست کند.';
+$string['default_category_name'] = 'سوالات تولیدی هوش مصنوعی';
+$string['default_quiz_intro'] = 'این آزمون توسط هوش مصنوعی طراحی شده و پس از بازبینی و تأیید استاد در سامانه قرار گرفته است.';
+$string['publish_success_message'] = 'سوالات با موفقیت به بانک سوالات درس اضافه شدند و ماژول آزمون در درس فعال گردید.';
+$string['ai_generation_failed'] = 'خطا در ارتباط با سرویس هوش مصنوعی: {$a}';
+$string['json_parse_error'] = 'پاسخ هوش مصنوعی در قالب استاندارد JSON دریافت نشد. لطفاً مجدداً تلاش فرمایید.';
+$string['invalid_questions_payload'] = 'داده‌های ارسالی سوالات نامعتبر است.';

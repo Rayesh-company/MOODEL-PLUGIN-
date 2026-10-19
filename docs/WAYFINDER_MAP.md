@@ -1,0 +1,114 @@
+# 🗺️ Wayfinder Map: AI Quiz Generator Plugin for Moodle
+
+`wayfinder:map` · Updated: 2026-10-19
+
+## Destination
+
+A **Moodle local plugin** (`local_aiquizgen`) that gives teachers an AI-powered quiz generation tab inside their course. The teacher selects course resources (PDFs, documents), configures quiz parameters (question types, difficulty, count), and the AI generates a complete quiz — previewed, editable, and published directly into Moodle's native Quiz module and Question Bank. Simple, teacher-controlled, production-ready for university-level exams.
+
+## Notes
+
+- **Domain**: Moodle 6.0dev LMS plugin development (PHP, Mustache, AMD/JS)
+- **Platform**: MOODEL — custom Moodle deployment at `d:\code\Hemat\MOODEL`
+- **Core AI Subsystem**: Plugin MUST use `core_ai\manager` with `generate_text` action — leverages all configured providers (OpenAI, Gemini, DeepSeek, Anthropic, Ollama, etc.)
+- **Key Constraint**: Integrate with existing Moodle features, not reinvent them
+- **Quality Standard**: University-level exam questions — serious, academic, pedagogically sound
+
+---
+
+## Decisions so far
+
+- [**Plugin Architecture Type**](#) — `local_aiquizgen` as a pure `local` plugin. Uses `core_ai\manager` directly for AI, adds course tab via `secondary_extend` hook, has own DB tables, pages, and templates. Not an `aiplacement`.
+
+- [**AI Output Format**](#) — Structured JSON. LLM outputs a well-defined JSON schema per question type. Plugin parses JSON and creates questions via `question_bank::get_qtype()->save_question()`. Most reliable for LLMs, easiest validation and error recovery.
+
+- [**Question Type Scope (MVP)**](#) — All 6 types supported from day one (university-level standard): **Multiple Choice**, **True/False**, **Short Answer**, **Essay**, **Matching**, **Ordering**.
+
+- [**Publishing Strategy**](#) — Both: questions go to a dedicated Question Bank category AND a quiz is auto-assembled. BUT — quiz is only created/published **after the teacher reviews and explicitly approves** (not auto-publish). Teacher must click "تأیید و انتشار" after preview.
+
+- [**Teacher Workflow UX (Ticket 4)**](#) — 4-Step Dedicated Full-Page Wizard inside the course tab ("آزمون‌ساز هوشمند"):
+  1. **انتخاب منابع**: اسکن خودکار فایل‌های درس (PDF/PPT/DOCX) + فیلد متن دلخواه استاد
+  2. **تنظیم پارامترها**: تعداد سوالات (اسلایدر ۳ تا ۳۰)، سطح دشواری دانشگاهی (مفهومی/تحلیلی/پیشرفته)، انتخاب ۶ نوع سوال، انتخاب زبان و مدل
+  3. **پیش‌نمایش و اصلاح**: کارت‌های تفکیک‌شده برای هر ۶ نوع سوال، ویرایش مستقیم متن (Inline)، حذف، و بازتولید هوشمند با فیلد چت مجزا برای هر سوال
+  4. **تأیید نهایی و انتشار**: خلاصه آماری، تنظیمات اختصاصی ماژول آزمون مودل (زمان، تعداد تلاش، رفتار بازخورد، دسته‌بندی بانک سوالات) و دکمه ساخت آزمون
+
+---
+
+## Not yet specified
+
+- **Multi-language prompt support** — should prompts be localizable or hardcoded English/Persian?
+- **Rate limiting / quota per teacher** — beyond core_ai's built-in rate limiter, do we need course-level quotas?
+- **Backup/restore integration** — should generated quiz metadata survive Moodle backup/restore?
+- **Student analytics feedback loop** — using quiz results to improve future generation quality
+- **Plugin admin settings page** — global defaults for prompt templates, max questions per generation, etc.
+- **Accessibility & RTL** — Persian/Arabic RTL layout compliance
+
+## Out of scope
+
+_(none ruled out yet)_
+
+---
+
+## Open Tickets
+
+### 🎫 Ticket 3: PDF & Document Text Extraction Strategy
+`wayfinder:research` · AFK · **FRONTIER** ✅
+
+#### Question
+How do we extract readable text from uploaded course resources (PDFs, DOCX, PPTX) for AI prompting?
+
+---
+
+### 🎫 Ticket 6: Prompt Engineering Strategy
+`wayfinder:research` · AFK · **FRONTIER** ✅
+
+#### Question
+Design the system prompt template that produces high-quality university-level questions in Structured JSON.
+
+---
+
+### 🎫 Ticket 7: Preview & Edit Interface Architecture
+`wayfinder:prototype` · HITL · **FRONTIER** ✅ (unblocked by Ticket 4)
+
+#### Question
+Technical implementation of the AMD JS module and Mustache templates for inline editing and single-question re-prompting via AJAX web services.
+
+---
+
+### 🎫 Ticket 9: Monitoring, History & Analytics
+`wayfinder:grilling` · HITL · **FRONTIER** ✅
+
+#### Question
+What monitoring/tracking do we need for exam generation and student attempt tracking?
+
+---
+
+### 🎫 Ticket 10: Database Schema Design
+`wayfinder:task` · AFK · **Blocked by**: Ticket 9
+
+#### Question
+Design `db/install.xml` tables for sessions, questions mapping, and resources.
+
+---
+
+## Architecture Overview
+
+```mermaid
+flowchart TD
+    A["👨‍🏫 Teacher opens course tab"] --> B["Step 1: Select Resources"]
+    B --> C["Step 2: Configure Parameters"]
+    C --> D["AJAX → local_aiquizgen web service"]
+    D --> E["Extract text from files\n(file_storage API)"]
+    E --> F["Build prompt\n(JSON schema + resources + params)"]
+    F --> G["core_ai\\manager::process_action\n(generate_text action)"]
+    G --> H["AI Provider\n(OpenAI/Gemini/DeepSeek/...)"]
+    H --> I["Parse JSON response"]
+    I --> J["Step 3: Preview questions"]
+    J --> K{"Teacher reviews"}
+    K -->|"Edit/Regenerate"| L["Modify & re-call AI"]
+    L --> J
+    K -->|"تأیید و انتشار"| M["Create questions via\nquestion_bank API"]
+    M --> N["Create quiz via\nadd_moduleinfo()"]
+    N --> O["Link questions via\nquiz_add_quiz_question()"]
+    O --> P["✅ Quiz live in course"]
+```
