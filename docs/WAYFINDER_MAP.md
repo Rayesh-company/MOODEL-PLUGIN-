@@ -43,6 +43,21 @@ A **Moodle local plugin** (`local_aiquizgen`) that gives teachers an AI-powered 
   3. **TXT / HTML / MD**: Read directly via `$file->get_content()` and sanitized.
   4. Works out-of-the-box on all Moodle servers without requiring external binaries (`pdftotext`, `tika`, or Python).
 
+- [**Prompt Engineering & JSON Schema (Ticket 6)**](#) — Rigid academic JSON schema implemented in `\local_aiquizgen\ai_service::build_system_prompt()`:
+  1. Enforces strict JSON output with zero markdown fences.
+  2. Defines typed question specs for all 6 university question types (`multichoice`, `truefalse`, `shortanswer`, `essay`, `match`, `ordering`).
+  3. Calibrates Bloom's taxonomy difficulty based on the `difficulty` parameter (standard, analytical, hard).
+  4. Automatically strips reasoning tags (e.g., `<think>...</think>`) using Moodle's `\core_ai\helper`.
+
+- [**Preview & Edit Interface Architecture (Ticket 7)**](#) — Moodle AMD Module + Mustache Architecture:
+  1. Fully integrated into Moodle's frontend architecture via `amd/src/wizard.js` and `templates/wizard.mustache`.
+  2. Uses `core/ajax` for asynchronous calls to the plugin's 4 external webservices.
+  3. Provides inline contentEditable question editing, instant question deletion, and single-question micro-reprompting.
+
+- [**Database Schema Design (Ticket 10)**](#) — Persistent Session & Quality Tracking (`db/install.xml`):
+  1. `local_aiquizgen_sessions`: Tracks teacher, course, prompt, difficulty, question types, and target quiz.
+  2. `local_aiquizgen_questions`: Stores generated questions, JSON payload, edit flags, and reprompt counters for AI quality analytics.
+
 ---
 
 ## Not yet specified
@@ -51,7 +66,6 @@ A **Moodle local plugin** (`local_aiquizgen`) that gives teachers an AI-powered 
 - **Rate limiting / quota per teacher** — beyond core_ai's built-in rate limiter, do we need course-level quotas?
 - **Backup/restore integration** — should generated quiz metadata survive Moodle backup/restore?
 - **Plugin admin settings page** — global defaults for prompt templates, max questions per generation, etc.
-- **Accessibility & RTL** — Persian/Arabic RTL layout compliance
 
 ## Out of scope
 
@@ -61,27 +75,8 @@ _(none ruled out yet)_
 
 ## Open Tickets
 
-### 🎫 Ticket 6: Prompt Engineering Strategy
-`wayfinder:research` · AFK · **FRONTIER** ✅
+*(All 10 tickets resolved! Destination reached — the way is completely clear and the plugin implementation is committed.)*
 
-#### Question
-Design the system prompt template that produces high-quality university-level questions in Structured JSON.
-
----
-
-### 🎫 Ticket 7: Preview & Edit Interface Architecture
-`wayfinder:prototype` · HITL · **FRONTIER** ✅
-
-#### Question
-Technical implementation of the AMD JS module and Mustache templates for inline editing and single-question re-prompting via AJAX web services.
-
----
-
-### 🎫 Ticket 10: Database Schema Finalization
-`wayfinder:task` · AFK · **FRONTIER** ✅
-
-#### Question
-Verify and finalize `db/install.xml` tables for sessions, questions tracking, and edit metrics.
 
 ---
 
