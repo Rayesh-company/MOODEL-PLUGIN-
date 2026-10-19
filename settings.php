@@ -32,5 +32,30 @@ if ($hassiteconfig) {
         PARAM_INT
     ));
 
+    $settings->add(new admin_setting_heading(
+        'local_aiquizgen/mastra_heading',
+        get_string('settings_mastra', 'local_aiquizgen'),
+        get_string('settings_mastra_desc', 'local_aiquizgen')
+    ));
+
+    $settings->add(new admin_setting_configselect(
+        'local_aiquizgen/ai_engine',
+        get_string('ai_engine', 'local_aiquizgen'),
+        get_string('ai_engine_desc', 'local_aiquizgen'),
+        'mastra_hybrid',
+        [
+            'mastra_hybrid' => get_string('engine_mastra_hybrid', 'local_aiquizgen'),
+            'moodle_ai' => get_string('engine_moodle_ai', 'local_aiquizgen'),
+        ]
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_aiquizgen/mastra_endpoint',
+        get_string('mastra_endpoint', 'local_aiquizgen'),
+        get_string('mastra_endpoint_desc', 'local_aiquizgen'),
+        'http://localhost:3000/api/workflows/quiz-generation-workflow',
+        PARAM_URL
+    ));
+
     $ADMIN->add('localplugins', $settings);
 }

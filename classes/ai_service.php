@@ -159,4 +159,75 @@ PROMPT;
 
         return $decoded['questions'];
     }
+
+    /**
+     * Dispatches generation to Mastra Agent Workflow if configured, falling back to core_ai.
+     *
+     * @param int $contextid
+     * @param int $userid
+     * @param array $payload
+     * @param string $systemprompt
+     * @return array Decoded questions array.
+     */
+    public static function execute_generation(int $contextid, int $userid, array $payload, string $systemprompt): array {
+        $engine = get_config('local_aiquizgen', 'ai_engine');
+        $endpoint = get_config('local_aiquizgen', 'mastra_endpoint');
+
+        if ($engine !== 'moodle_ai' && !empty($endpoint)) {
+            try {
+                $questions = self::call_mastra_workflow($endpoint, $payload);
+                if (!empty($questions)) {
+                    return $questions;
+                }
+            } catch (\Throwable $e) {
+                // Graceful fallback to Moodle core_ai if Mastra is unavailable.
+                debugging('Mastra workflow unreachable, falling back to Moodle core_ai: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            }
+        }
+
+        return self::call_moodle_ai($contextid, $userid, $systemprompt);
+    }
+
+    /**
+     * Executes the Mastra Agent Workflow via HTTP POST.
+     *
+     * @param string $endpoint
+     * @param array $payload
+     * @return array
+     */
+    public static function call_mastra_workflow(string $endpoint, array $payload): array {
+        $client = new \core\http_client();
+        $response = $client->post($endpoint . '/start', [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+            'json' => [
+                'inputData' => $payload,
+            ],
+            'timeout' => 90,
+        ]);
+
+        if ($response->getStatusCode() !== 200) {
+            throw new \moodle_exception('mastra_http_error', 'local_aiquizgen', '', 'HTTP ' . $response->getStatusCode());
+        }
+
+        $body = (string) $response->getBody();
+        $result = json_decode($body, true);
+
+        // Mastra suspend payload returns { status: 'suspended', suspendPayload: { candidates: [...] } }
+        if (!empty($result['suspendPayload']['candidates'])) {
+            return $result['suspendPayload']['candidates'];
+        }
+
+        if (!empty($result['results']['candidates'])) {
+            return $result['results']['candidates'];
+        }
+
+        if (!empty($result['finalQuestions'])) {
+            return $result['finalQuestions'];
+        }
+
+        return [];
+    }
 }

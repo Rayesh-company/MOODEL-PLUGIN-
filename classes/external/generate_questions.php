@@ -101,7 +101,18 @@ class generate_questions extends external_api {
         $session->timemodified = time();
         $sessionid = $DB->insert_record('local_aiquizgen_sessions', $session);
 
-        $questions = ai_service::call_moodle_ai($context->id, $USER->id, $systemprompt);
+        $mastrapayload = [
+            'courseId' => $params['courseid'],
+            'teacherId' => $USER->id,
+            'teacherPrompt' => $params['prompt'],
+            'difficulty' => $params['difficulty'],
+            'questionCount' => $params['qcount'],
+            'questionTypes' => $params['qtypes'],
+            'resourceTexts' => $excerpts,
+            'language' => $params['lang'],
+        ];
+
+        $questions = ai_service::execute_generation($context->id, $USER->id, $mastrapayload, $systemprompt);
 
         // Save generated questions to session.
         foreach ($questions as $q) {
