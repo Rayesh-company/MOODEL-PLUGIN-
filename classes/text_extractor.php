@@ -49,8 +49,69 @@ class text_extractor {
             return self::extract_from_pdf($file, $maxchars);
         }
 
-        // Default fallback: strip non-printable characters.
         return self::clean_text($file->get_content(), $maxchars);
+    }
+
+    /**
+     * Extracts readable text content directly from a local filesystem path.
+     *
+     * @param string $filepath
+     * @param string $filename
+     * @param int $maxchars
+     * @return string
+     */
+    public static function extract_from_path(string $filepath, string $filename = '', int $maxchars = 8000): string {
+        if (!file_exists($filepath)) {
+            return '';
+        }
+        if (empty($filename)) {
+            $filename = basename($filepath);
+        }
+        $filename = strtolower($filename);
+
+        if (str_ends_with($filename, '.txt') || str_ends_with($filename, '.md')) {
+            return self::clean_text((string) file_get_contents($filepath), $maxchars);
+        }
+
+        if (str_ends_with($filename, '.html') || str_ends_with($filename, '.htm')) {
+            return self::clean_text(strip_tags((string) file_get_contents($filepath)), $maxchars);
+        }
+
+        if (str_ends_with($filename, '.docx')) {
+            $zip = new ZipArchive();
+            $text = '';
+            if ($zip->open($filepath) === true) {
+                $xmlcontent = $zip->getFromName('word/document.xml');
+                if ($xmlcontent) {
+                    $xmlcontent = str_replace(['</w:p>', '</w:tr>'], "\n", $xmlcontent);
+                    $text = strip_tags($xmlcontent);
+                }
+                $zip->close();
+            }
+            return self::clean_text($text, $maxchars);
+        }
+
+        if (str_ends_with($filename, '.pptx')) {
+            $zip = new ZipArchive();
+            $text = '';
+            if ($zip->open($filepath) === true) {
+                for ($i = 1; $i <= $zip->numFiles; $i++) {
+                    $slide = $zip->getFromName("ppt/slides/slide{$i}.xml");
+                    if ($slide) {
+                        $slide = str_replace(['</a:p>', '</a:tr>'], "\n", $slide);
+                        $text .= "\n" . strip_tags($slide);
+                    }
+                }
+                $zip->close();
+            }
+            return self::clean_text($text, $maxchars);
+        }
+
+        if (str_ends_with($filename, '.pdf')) {
+            return self::parse_pdf_content((string) file_get_contents($filepath), $maxchars);
+        }
+
+        return self::clean_text((string) file_get_contents($filepath), $maxchars);
     }
 
     /**
@@ -103,34 +164,54 @@ class text_extractor {
      * Pure-PHP PDF stream text extractor for text-based PDF files.
      */
     protected static function extract_from_pdf(stored_file $file, int $maxchars): string {
-        $content = $file->get_content();
+        return self::parse_pdf_content($file->get_content(), $maxchars);
+    }
+
+    /**
+     * High-performance, backtracking-free PDF stream text extractor.
+     */
+    protected static function parse_pdf_content(string $content, int $maxchars): string {
         $text = '';
+        $offset = 0;
+        $contentlen = strlen($content);
 
-        // Match all decompressed text blocks (BT ... ET) or streams.
-        if (preg_match_all('/\((.*?)\)\s*Tj/s', $content, $matches)) {
-            $text = implode(' ', $matches[1]);
-        } else if (preg_match_all('/\[(.*?)\]\s*TJ/s', $content, $matches)) {
-            foreach ($matches[1] as $block) {
-                if (preg_match_all('/\((.*?)\)/s', $block, $submatches)) {
-                    $text .= ' ' . implode('', $submatches[1]);
-                }
+        // High-performance O(N) stream scanner via strpos to eliminate regex backtracking.
+        while ($offset < $contentlen && ($pos = strpos($content, 'stream', $offset)) !== false) {
+            $streamstart = $pos + 6;
+            if ($streamstart < $contentlen && $content[$streamstart] === "\r" && isset($content[$streamstart + 1]) && $content[$streamstart + 1] === "\n") {
+                $streamstart += 2;
+            } else if ($streamstart < $contentlen && ($content[$streamstart] === "\n" || $content[$streamstart] === "\r")) {
+                $streamstart += 1;
             }
-        }
 
-        if (empty(trim($text))) {
-            // Decompress FlateDecode streams if available in PHP.
-            if (preg_match_all('/stream[\r\n]+(.*?)[\r\n]+endstream/s', $content, $streams)) {
-                foreach ($streams[1] as $stream) {
-                    $decompressed = @gzuncompress($stream);
-                    if ($decompressed) {
-                        if (preg_match_all('/\((.*?)\)\s*Tj/s', $decompressed, $sm)) {
-                            $text .= ' ' . implode(' ', $sm[1]);
+            $endpos = strpos($content, 'endstream', $streamstart);
+            if ($endpos === false) {
+                break;
+            }
+
+            $streamlen = $endpos - $streamstart;
+            if ($streamlen > 0 && $streamlen < 5000000) {
+                $streamdata = substr($content, $streamstart, $streamlen);
+                $decompressed = @gzuncompress($streamdata);
+                $target = $decompressed ?: $streamdata;
+
+                // Non-backtracking character classes: [^()]* and [^\[\]]*
+                if (preg_match_all('/\(([^()]*)\)\s*Tj/', $target, $sm)) {
+                    $text .= ' ' . implode(' ', $sm[1]);
+                } else if (preg_match_all('/\[([^\[\]]*)\]\s*TJ/', $target, $sm)) {
+                    foreach ($sm[1] as $block) {
+                        if (preg_match_all('/\(([^()]*)\)/', $block, $subm)) {
+                            $text .= ' ' . implode('', $subm[1]);
                         }
                     }
                 }
             }
-        }
 
+            $offset = $endpos + 9;
+            if (mb_strlen($text) >= $maxchars) {
+                break;
+            }
+        }
         return self::clean_text($text, $maxchars);
     }
 
