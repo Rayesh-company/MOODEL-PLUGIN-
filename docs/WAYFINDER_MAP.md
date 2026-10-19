@@ -58,6 +58,12 @@ A **Moodle local plugin** (`local_aiquizgen`) that gives teachers an AI-powered 
   1. `local_aiquizgen_sessions`: Tracks teacher, course, prompt, difficulty, question types, and target quiz.
   2. `local_aiquizgen_questions`: Stores generated questions, JSON payload, edit flags, and reprompt counters for AI quality analytics.
 
+- [**Mastra Workflow Engine Mode (Approved)**](#) — Workflows with Parallel Generation & HITL Suspend/Resume:
+  1. **DAG-Based Orchestration**: Replaces unpredictable conversational loops with a typed, deterministic Directed Acyclic Graph using `@mastra/core/workflows`.
+  2. **Parallel Generation**: Executes MCQ, True/False, and Essay generation concurrently via `.parallel([generateMCQStep, generateTrueFalseStep, generateEssayStep])`.
+  3. **Human-in-the-Loop Suspend & Resume**: Statefully pauses via `step.suspend()` with `suspendSchema` while the teacher conducts inline edits, resuming only on teacher publish approval (`step.resume()`).
+  4. **Dual-Engine Fallback**: Seamless fallback in Moodle (`local_aiquizgen`) to native `\core_ai\manager` if Mastra service is offline.
+
 ---
 
 ## Not yet specified
