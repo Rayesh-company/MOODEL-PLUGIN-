@@ -180,7 +180,7 @@ class quiz_builder {
      * @param array $settings
      * @return int The quiz module instance ID.
      */
-    public static function create_quiz_with_questions(int $courseid, string $quizname, array $questionids, array $settings = []): int {
+    public static function create_quiz_with_questions(int $courseid, string $quizname, array $questionids, array $settings = []): array {
         global $DB;
         $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 
