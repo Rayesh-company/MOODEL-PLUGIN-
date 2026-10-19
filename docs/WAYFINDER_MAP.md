@@ -32,6 +32,11 @@ A **Moodle local plugin** (`local_aiquizgen`) that gives teachers an AI-powered 
   3. **پیش‌نمایش و اصلاح**: کارت‌های تفکیک‌شده برای هر ۶ نوع سوال، ویرایش مستقیم متن (Inline)، حذف، و بازتولید هوشمند با فیلد چت مجزا برای هر سوال
   4. **تأیید نهایی و انتشار**: خلاصه آماری، تنظیمات اختصاصی ماژول آزمون مودل (زمان، تعداد تلاش، رفتار بازخورد، دسته‌بندی بانک سوالات) و دکمه ساخت آزمون
 
+- [**Monitoring & Analytics Strategy (Ticket 9)**](#) — Hybrid Monitoring & AI Quality Feedback Loop:
+  1. **داشبورد پایش سریع در پلاگین**: نمایش فهرست آزمون‌های تولیدشده توسط هوش مصنوعی به همراه تعداد شرکت‌کنندگان، وضعیت تصحیح، و میانگین نمرات در خود تب پلاگین.
+  2. **اتصال عمیق به گزارش‌های نیتیو مودل (`mod_quiz\report`)**: دسترسی تک‌کلیکه به گزارش آماری ضریب تمایز و ضریب دشواری تک‌تک سوالات (`report_statistics`)، جدول پاسخ‌های تک‌تک دانشجویان (`report_responses`)، و گزارش نمرات (`report_overview`).
+  3. **حلقه بازخورد کیفیت AI (Quality Feedback Loop)**: ثبت دقیق نرخ ویرایش استاد، تعداد بازتولیدها و سوالات حذف‌شده در جدول `local_aiquizgen_questions` برای کالیبراسیون و بهبود خودکار پرامپت‌های بعدی.
+
 ---
 
 ## Not yet specified
@@ -39,7 +44,6 @@ A **Moodle local plugin** (`local_aiquizgen`) that gives teachers an AI-powered 
 - **Multi-language prompt support** — should prompts be localizable or hardcoded English/Persian?
 - **Rate limiting / quota per teacher** — beyond core_ai's built-in rate limiter, do we need course-level quotas?
 - **Backup/restore integration** — should generated quiz metadata survive Moodle backup/restore?
-- **Student analytics feedback loop** — using quiz results to improve future generation quality
 - **Plugin admin settings page** — global defaults for prompt templates, max questions per generation, etc.
 - **Accessibility & RTL** — Persian/Arabic RTL layout compliance
 
@@ -68,26 +72,18 @@ Design the system prompt template that produces high-quality university-level qu
 ---
 
 ### 🎫 Ticket 7: Preview & Edit Interface Architecture
-`wayfinder:prototype` · HITL · **FRONTIER** ✅ (unblocked by Ticket 4)
+`wayfinder:prototype` · HITL · **FRONTIER** ✅
 
 #### Question
 Technical implementation of the AMD JS module and Mustache templates for inline editing and single-question re-prompting via AJAX web services.
 
 ---
 
-### 🎫 Ticket 9: Monitoring, History & Analytics
-`wayfinder:grilling` · HITL · **FRONTIER** ✅
+### 🎫 Ticket 10: Database Schema Finalization
+`wayfinder:task` · AFK · **FRONTIER** ✅ (unblocked by Ticket 9)
 
 #### Question
-What monitoring/tracking do we need for exam generation and student attempt tracking?
-
----
-
-### 🎫 Ticket 10: Database Schema Design
-`wayfinder:task` · AFK · **Blocked by**: Ticket 9
-
-#### Question
-Design `db/install.xml` tables for sessions, questions mapping, and resources.
+Verify and finalize `db/install.xml` tables for sessions, questions tracking, and edit metrics.
 
 ---
 
