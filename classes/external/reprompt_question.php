@@ -58,7 +58,7 @@ OUTPUT INSTRUCTION:
 Output ONLY a single valid JSON object containing the updated question in the exact same schema. Wrap in {"questions": [ ...updated question... ]}. No markdown backticks.
 PROMPT;
 
-        $questions = ai_service::call_moodle_ai($context->id, $USER->id, $prompt);
+        $questions = ai_service::execute_generation($context->id, $USER->id, [], $prompt);
 
         return [
             'status' => true,

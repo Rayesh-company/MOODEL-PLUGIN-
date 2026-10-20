@@ -173,7 +173,7 @@ PROMPT;
     }
 
     /**
-     * Dispatches generation to Mastra Agent Workflow if configured, falling back to core_ai.
+     * Dispatches generation to AvalAI, Mastra Agent Workflow, or Moodle core_ai.
      *
      * @param int $contextid
      * @param int $userid
@@ -183,21 +183,105 @@ PROMPT;
      */
     public static function execute_generation(int $contextid, int $userid, array $payload, string $systemprompt): array {
         $engine = get_config('local_aiquizgen', 'ai_engine');
-        $endpoint = get_config('local_aiquizgen', 'mastra_endpoint');
 
-        if ($engine !== 'moodle_ai' && !empty($endpoint)) {
+        // 1. Direct AvalAI API with DeepSeek / Flash models.
+        if ($engine === 'avalai' || empty($engine)) {
+            try {
+                return self::call_avalai_api($systemprompt);
+            } catch (\Throwable $e) {
+                debugging('AvalAI API error, attempting fallback: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            }
+        }
+
+        // 2. Mastra Agent Workflow.
+        $endpoint = get_config('local_aiquizgen', 'mastra_endpoint');
+        if ($engine === 'mastra_hybrid' && !empty($endpoint)) {
             try {
                 $questions = self::call_mastra_workflow($endpoint, $payload);
                 if (!empty($questions)) {
                     return $questions;
                 }
             } catch (\Throwable $e) {
-                // Graceful fallback to Moodle core_ai if Mastra is unavailable.
                 debugging('Mastra workflow unreachable, falling back to Moodle core_ai: ' . $e->getMessage(), DEBUG_DEVELOPER);
             }
         }
 
+        // 3. Fallback to Moodle core_ai.
         return self::call_moodle_ai($contextid, $userid, $systemprompt);
+    }
+
+    /**
+     * Executes generation via AvalAI API (OpenAI-compatible).
+     *
+     * @param string $systemprompt
+     * @param string $model
+     * @return array
+     */
+    public static function call_avalai_api(string $systemprompt, string $model = ''): array {
+        $apikey = get_config('local_aiquizgen', 'avalai_api_key') ?: 'aa-6ZlvSSRsw9smYSEZFhqp90LzwmP2qDVSzVAlV8cqtdV24wpE';
+        $endpoint = get_config('local_aiquizgen', 'avalai_endpoint') ?: 'https://api.avalai.org/v1';
+        $model = !empty($model) ? $model : (get_config('local_aiquizgen', 'avalai_model') ?: 'deepseek-v4.1-flash');
+
+        $payload = [
+            'model' => $model,
+            'messages' => [
+                [
+                    'role' => 'user',
+                    'content' => $systemprompt,
+                ],
+            ],
+            'temperature' => 0.4,
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, rtrim($endpoint, '/') . '/chat/completions');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $apikey,
+            'Content-Type: application/json',
+            'Accept: application/json',
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 90);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+
+        $response = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlerror = curl_error($ch);
+        curl_close($ch);
+
+        if ($httpcode !== 200 || empty($response)) {
+            throw new \moodle_exception('avalai_api_error', 'local_aiquizgen', '', "HTTP $httpcode: $curlerror $response");
+        }
+
+        $result = json_decode($response, true);
+        $rawtext = $result['choices'][0]['message']['content'] ?? '';
+
+        // Strip reasoning tags if present (e.g., DeepSeek <think>...</think>).
+        if (class_exists('\core_ai\helper')) {
+            $rawtext = \core_ai\helper::strip_reasoning_tags($rawtext);
+        } else {
+            $rawtext = preg_replace('/<think>[\s\S]*?<\/think>/', '', $rawtext);
+        }
+
+        // Clean markdown backticks.
+        $rawtext = preg_replace('/^```(?:json)?\s*/i', '', trim($rawtext));
+        $rawtext = preg_replace('/\s*```$/', '', $rawtext);
+
+        $decoded = json_decode($rawtext, true);
+        if (json_last_error() !== JSON_ERROR_NONE || empty($decoded['questions'])) {
+            if (preg_match('/\{[\s\S]*"questions"[\s\S]*\}/', $rawtext, $matches)) {
+                $decoded = json_decode($matches[0], true);
+            }
+        }
+
+        if (empty($decoded['questions'])) {
+            throw new \moodle_exception('json_parse_error', 'local_aiquizgen', '', substr($rawtext, 0, 500));
+        }
+
+        return $decoded['questions'];
     }
 
     /**
