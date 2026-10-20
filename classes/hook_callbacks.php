@@ -24,21 +24,27 @@ class hook_callbacks {
      * @param secondary_extend $hook
      */
     public static function secondary_extend(secondary_extend $hook): void {
-        global $CFG;
+        global $CFG, $PAGE;
 
         if (get_config('local_aiquizgen', 'enablecoursetab') === '0') {
             return;
         }
 
-        $secondary = $hook->get_secondaryview();
-        $context = $secondary->context;
+        $context = $PAGE->context ?? null;
+        if (!$context) {
+            return;
+        }
 
         // Ensure we are inside a course context (not site home).
-        if ($context->contextlevel === CONTEXT_COURSE && $context->instanceid != SITEID) {
+        if ($context->contextlevel == CONTEXT_COURSE && $context->instanceid != SITEID) {
             $courseid = $context->instanceid;
 
             // Only show to users with permission to generate quizzes.
             if (has_capability('local/aiquizgen:generate', $context)) {
+                $secondary = $hook->get_secondaryview();
+                if ($secondary->get('local_aiquizgen') || $secondary->get('local_aiquizgen_tab')) {
+                    return;
+                }
                 $secondary->add(
                     get_string('pluginname', 'local_aiquizgen'),
                     new moodle_url('/local/aiquizgen/view.php', ['id' => $courseid]),

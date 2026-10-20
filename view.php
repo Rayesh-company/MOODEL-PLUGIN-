@@ -9,7 +9,7 @@
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/course/lib.php');
 
-$id = required_param('id', PARAM_INT); // Course ID.
+$id = optional_param('id', 0, PARAM_INT) ?: required_param('courseid', PARAM_INT); // Course ID.
 $course = $DB->get_record('course', ['id' => $id], '*', MUST_EXIST);
 
 require_login($course);
