@@ -64,13 +64,18 @@ class generate_questions extends external_api {
         self::validate_context($context);
         require_capability('local/aiquizgen:generate', $context);
 
+        // Fetch course metadata to strictly anchor AI generation to the academic discipline.
+        $course = $DB->get_record('course', ['id' => $params['courseid']], '*', MUST_EXIST);
+        $coursename = format_string($course->fullname, true, ['context' => $context]);
+        $coursesummary = clean_text($course->summary, FORMAT_HTML);
+
         // Gather text excerpts from selected files using robust text extractor.
         $fs = get_file_storage();
         $excerpts = [];
         foreach ($params['fileids'] as $fid) {
             $file = $fs->get_file_by_id($fid);
             if ($file && !$file->is_directory()) {
-                $extracted = \local_aiquizgen\text_extractor::extract_text($file, 4000);
+                $extracted = \local_aiquizgen\text_extractor::extract_text($file, 6000);
                 if (!empty($extracted)) {
                     $excerpts[] = "--- File: " . $file->get_filename() . " ---\n" . $extracted;
                 }
@@ -78,14 +83,21 @@ class generate_questions extends external_api {
         }
         $resourcetext = implode("\n\n", $excerpts);
 
-        // Build prompt and dispatch to Moodle core_ai.
+        // Fallback: If no files were provided or no text could be extracted, provide course syllabus context.
+        if (trim($resourcetext) === '') {
+            $resourcetext = "[Course Subject: " . $coursename . "]\n" . (!empty($coursesummary) ? "[Course Description: " . $coursesummary . "]" : "[Course material files provided no text streams; create questions testing core topics of " . $coursename . "]");
+        }
+
+        // Build prompt and dispatch to Moodle core_ai / AvalAI with subject guardrails.
         $systemprompt = ai_service::build_system_prompt(
             $resourcetext,
             $params['prompt'],
             $params['qcount'],
             $params['difficulty'],
             $params['qtypes'],
-            $params['lang']
+            $params['lang'],
+            $coursename,
+            $coursesummary
         );
 
         // Track generation session in database.
@@ -103,6 +115,8 @@ class generate_questions extends external_api {
 
         $mastrapayload = [
             'courseId' => $params['courseid'],
+            'courseName' => $coursename,
+            'courseSummary' => $coursesummary,
             'teacherId' => $USER->id,
             'teacherPrompt' => $params['prompt'],
             'difficulty' => $params['difficulty'],

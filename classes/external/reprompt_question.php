@@ -32,7 +32,7 @@ class reprompt_question extends external_api {
     }
 
     public static function execute(int $courseid, string $currentquestionjson, string $instruction): array {
-        global $USER;
+        global $USER, $DB;
 
         $params = self::validate_parameters(self::execute_parameters(), [
             'courseid' => $courseid,
@@ -44,8 +44,16 @@ class reprompt_question extends external_api {
         self::validate_context($context);
         require_capability('local/aiquizgen:generate', $context);
 
+        $course = $DB->get_record('course', ['id' => $params['courseid']], '*', MUST_EXIST);
+        $coursename = format_string($course->fullname, true, ['context' => $context]);
+
         $prompt = <<<PROMPT
-You are a university exam editor.
+You are an expert university professor and exam editor.
+ACADEMIC COURSE TITLE: {$coursename}
+
+CRITICAL GUARDRAIL:
+The updated question MUST strictly assess knowledge of "{$coursename}". Pedagogical instructions like "مخصوص پیش‌خوانی" (pre-reading), "ساده‌تر" (simpler), or "کوییز" (quiz) define the question's difficulty and depth, NEVER the subject itself. Do NOT generate questions about study skills or reading techniques.
+
 The teacher wants you to modify/regenerate this single exam question based on their feedback:
 
 CURRENT QUESTION (JSON):
@@ -55,7 +63,7 @@ TEACHER MODIFICATION INSTRUCTION:
 {$params['instruction']}
 
 OUTPUT INSTRUCTION:
-Output ONLY a single valid JSON object containing the updated question in the exact same schema. Wrap in {"questions": [ ...updated question... ]}. No markdown backticks.
+Output ONLY a single valid JSON object containing the updated question in the exact same schema. Wrap in {"questions": [ ...updated question... ]}. No markdown code fences and no surrounding prose.
 PROMPT;
 
         $questions = ai_service::execute_generation($context->id, $USER->id, [], $prompt);

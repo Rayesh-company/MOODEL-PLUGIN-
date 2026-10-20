@@ -26,6 +26,8 @@ class ai_service {
      * @param string $difficulty Difficulty level.
      * @param array $qtypes Array of question type strings.
      * @param string $lang Language.
+     * @param string $coursename Full academic course name.
+     * @param string $coursesummary Course summary or syllabus.
      * @return string
      */
     public static function build_system_prompt(
@@ -34,26 +36,57 @@ class ai_service {
         int $qcount,
         string $difficulty,
         array $qtypes,
-        string $lang = 'fa'
+        string $lang = 'fa',
+        string $coursename = '',
+        string $coursesummary = ''
     ): string {
         $typesstr = implode(', ', $qtypes);
 
-        $prompt = <<<PROMPT
-You are a university professor creating an academic exam.
-Based strictly on the provided course material and instructions, generate exactly {$qcount} high-quality university-level exam questions.
+        $courseheader = '';
+        if (!empty($coursename)) {
+            $courseheader .= "ACADEMIC COURSE TITLE / SUBJECT: {$coursename}\n";
+        }
+        if (!empty($coursesummary)) {
+            $courseheader .= "COURSE SYLLABUS & DESCRIPTION:\n{$coursesummary}\n";
+        }
 
+        $prompt = <<<PROMPT
+You are an expert university professor and exam designer creating an academic examination.
+Your mission is to generate exactly {$qcount} high-quality, rigorous academic exam questions for university students.
+
+=== ACADEMIC DOMAIN & COURSE CONTEXT ===
+{$courseheader}
+
+=== STRICT PEDAGOGICAL GUARDRAIL & SUBJECT ANCHORING (CRITICAL) ===
+1. PRIMARY SUBJECT ANCHOR:
+   All generated questions MUST strictly test the academic subject matter of "{$coursename}" and the provided course materials.
+2. PEDAGOGICAL INTENT VS. ACADEMIC SUBJECT GUARDRAIL:
+   Teachers frequently provide instructions specifying the pedagogical purpose, timing, or format of the exam, such as:
+   - "مخصوص پیش‌خوانی" (Pre-reading preparation / baseline diagnostic readiness check)
+   - "کوییز کلاسی / آزمک" (Short classroom quiz)
+   - "ارزیابی تکوینی / مستمر" (Formative continuous assessment)
+   - "آزمون میان‌ترم" (Midterm exam)
+   - "سنجش آغازین / ورودی" (Diagnostic readiness check before starting a lecture)
+   WARNING: These pedagogical terms define the EXAM FORMAT AND DIFFICULTY LEVEL. They NEVER represent the academic subject matter!
+   - Under NO circumstances should you generate questions about "methods of pre-reading", "study skills", "reading comprehension techniques", or "how to prepare for a class"!
+   - If the teacher requests "پیش‌خوانی" (pre-reading), you MUST generate foundational, concept-check, or diagnostic readiness questions assessing students' grasp of core concepts, terminology, and definitions of the COURSE SUBJECT ("{$coursename}") before they attend the lecture.
+3. SOURCE MATERIAL ADHERENCE:
+   Extract questions, formulas, definitions, and real examples directly from the provided course excerpts.
+   If excerpts are brief or supplementary, anchor strictly in the academic curriculum of "{$coursename}".
+
+=== EXAM SPECIFICATIONS ===
 TARGET AUDIENCE: University Students
 DIFFICULTY LEVEL: {$difficulty}
 QUESTION TYPES ALLOWED: {$typesstr}
 LANGUAGE: {$lang}
 
-TEACHER INSTRUCTIONS:
+=== TEACHER INSTRUCTIONS ===
 {$teacherprompt}
 
-COURSE MATERIAL EXCERPTS:
+=== COURSE MATERIAL EXCERPTS ===
 {$resourcetext}
 
-OUTPUT INSTRUCTION:
+=== OUTPUT INSTRUCTION ===
 You MUST output ONLY a valid JSON object matching the following specification, with no markdown code fences, no introductory remarks, and no trailing commentary.
 
 JSON SCHEMA:
@@ -143,7 +176,8 @@ PROMPT;
         $response = $manager->process_action($action);
 
         if (!$response->get_success()) {
-            throw new \moodle_exception('ai_generation_failed', 'local_aiquizgen', '', $response->get_error_message());
+            $errmsg = method_exists($response, 'get_errormessage') ? $response->get_errormessage() : ($response->get_error() ?? 'Unknown AI error');
+            throw new \moodle_exception('ai_generation_failed', 'local_aiquizgen', '', $errmsg);
         }
 
         $rawtext = $response->get_response_data()['generatedcontent'] ?? '';
@@ -189,7 +223,12 @@ PROMPT;
             try {
                 return self::call_avalai_api($systemprompt);
             } catch (\Throwable $e) {
-                debugging('AvalAI API error, attempting fallback: ' . $e->getMessage(), DEBUG_DEVELOPER);
+                // If Mastra is configured, try fallback, otherwise rethrow the real AvalAI error.
+                $endpoint = get_config('local_aiquizgen', 'mastra_endpoint');
+                if (empty($endpoint)) {
+                    throw $e;
+                }
+                debugging('AvalAI API error, attempting fallback to Mastra: ' . $e->getMessage(), DEBUG_DEVELOPER);
             }
         }
 
@@ -231,24 +270,48 @@ PROMPT;
                 ],
             ],
             'temperature' => 0.4,
+            'max_tokens' => 4096,
         ];
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, rtrim($endpoint, '/') . '/chat/completions');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Bearer ' . $apikey,
-            'Content-Type: application/json',
-            'Accept: application/json',
-        ]);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 90);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        $attempts = 0;
+        $maxattempts = 2;
+        $response = null;
+        $httpcode = 0;
+        $curlerror = '';
 
-        $response = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        while ($attempts < $maxattempts) {
+            $attempts++;
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, rtrim($endpoint, '/') . '/chat/completions');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $apikey,
+                'Content-Type: application/json',
+                'Accept: application/json',
+            ]);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+
+            $response = curl_exec($ch);
+            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlerror = curl_error($ch);
+            curl_close($ch);
+
+            if ($httpcode === 200 && !empty($response)) {
+                break;
+            }
+            if ($attempts < $maxattempts && ($httpcode === 429 || $httpcode >= 500)) {
+                sleep(2);
+                continue;
+            }
+        }
+
+        if ($httpcode !== 200 || empty($response)) {
+            throw new \moodle_exception('avalai_api_error', 'local_aiquizgen', '', "HTTP $httpcode: $curlerror $response");
+        }
         $curlerror = curl_error($ch);
         curl_close($ch);
 
